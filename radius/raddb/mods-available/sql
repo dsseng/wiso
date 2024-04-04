@@ -37,7 +37,7 @@ sql {
 	#	sqlite
 	#	mongo
 	#
-	dialect = "sqlite"
+	dialect = "postgresql"
 
 	#
 	#  The driver module used to execute the queries.  Since we
@@ -57,7 +57,7 @@ sql {
 	#	rlm_sql_iodbc
 	#	rlm_sql_unixodbc
 	#
-	driver = "rlm_sql_null"
+	driver = "rlm_sql_postgresql"
 #	driver = "rlm_sql_${dialect}"
 
 	#
@@ -164,10 +164,10 @@ sql {
 
 	# Connection info:
 	#
-#	server = "localhost"
-#	port = 3306
-#	login = "radius"
-#	password = "radpass"
+	server = "172.17.0.7"
+	port = 5432
+	login = "radius"
+	password = "radpass"
 
 	# Connection info for Mongo
 	# Authentication Without SSL
