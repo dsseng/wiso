@@ -339,7 +339,7 @@ authorize {
 	#  the MS-CHAP-Challenge attribute, and add 'Auth-Type := MS-CHAP'
 	#  to the request, which will cause the server to then use
 	#  the mschap module for authentication.
-	mschap
+	# mschap
 
 	#
 	#  If you have a Cisco SIP server authenticating against
@@ -402,10 +402,10 @@ authorize {
 	#  uncomment it as well; this will further reduce the number of
 	#  LDAP and/or SQL queries for TTLS or PEAP.
 	#
-	eap {
-		ok = return
+	# eap {
+	# 	ok = return
 #		updated = return
-	}
+	# }
 
 	#
 	#  Pull crypt'd passwords from /etc/passwd or /etc/shadow,
@@ -418,7 +418,7 @@ authorize {
 	#
 	#  Read the 'users' file.  In v3, this is located in
 	#  raddb/mods-config/files/authorize
-	files
+	# files
 
 	#
 	#  Look in an SQL database.  The schema of the database
@@ -468,7 +468,7 @@ authorize {
 	#  This module should be listed last, so that the other modules
 	#  get a chance to set Auth-Type for themselves.
 	#
-	pap
+	# pap
 
 	#
 	#  If "status_server = yes", then Status-Server messages are passed
