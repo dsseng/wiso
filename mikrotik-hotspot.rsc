@@ -27,4 +27,4 @@ add address="10.12.12.1/24" interface=hs_bridge network=10.12.12.0
 add address="10.12.12.0/24" gateway=10.12.12.1
 
 /radius
-add address=192.168.88.235 realm=testrealm service=hotspot
+add address=192.168.88.235 service=hotspot
