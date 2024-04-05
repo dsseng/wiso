@@ -4,4 +4,4 @@ RUN dnf update -y && dnf install -y freeradius freeradius-postgresql freeradius-
 RUN rm -rf /etc/raddb
 COPY ./raddb /etc/raddb/
 
-ENTRYPOINT ["/usr/sbin/radiusd", "-X"]
+ENTRYPOINT ["/usr/sbin/radiusd", "-fxl", "stdout"]
