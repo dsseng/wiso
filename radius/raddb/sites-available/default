@@ -468,7 +468,7 @@ authorize {
 	#  This module should be listed last, so that the other modules
 	#  get a chance to set Auth-Type for themselves.
 	#
-	# pap
+	pap
 
 	#
 	#  If "status_server = yes", then Status-Server messages are passed
