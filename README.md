@@ -1,10 +1,11 @@
 # Minimalist captive portal with advanced features
 
 ```
-docker build -t ghcr.io/dsseng/freeradius:latest .
+docker build -t ghcr.io/dsseng/wiso-freeradius:latest contrib/radius
+docker build -t ghcr.io/dsseng/wiso-postgres:latest contrib/postgres
 
-docker run --name radius-postgres -e POSTGRES_PASSWORD=mysecretpassword -d postgres
-docker run --name radius -p 1812-1813:1812-1813/udp -d --tmpfs /var/log/radius ghcr.io/dsseng/freeradius:latest
+docker run --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -d ghcr.io/dsseng/wiso-postgres:latest
+docker run --name some-radius -p 1812-1813:1812-1813/udp --tmpfs /var/log/radius -d ghcr.io/dsseng/wiso-freeradius:latest
 ```
 
 This project is developed, tested and deployed with MikroTik RouterOS-based hardware.
