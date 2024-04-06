@@ -15,7 +15,11 @@ var radusersCmd = &cobra.Command{
 	Short: "Manage users in the RADIUS DB (typically MAC addresses)",
 	Run: func(cmd *cobra.Command, args []string) {
 		var results []radius.RadCheck
-		db.Find(&results)
+		res := db.Find(&results)
+		if res.Error != nil {
+			fmt.Println("A DB error occured", res.Error)
+			return
+		}
 
 		headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
 		columnFmt := color.New(color.FgYellow).SprintfFunc()
@@ -24,6 +28,36 @@ var radusersCmd = &cobra.Command{
 		tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 		for _, r := range results {
+			authData := fmt.Sprintf("%s %s %s", r.Attribute, r.Op, r.Value)
+			if authData == "Cleartext-Password := macauth" {
+				authData = "Authorized by MAC"
+			}
+			tbl.AddRow(r.ID, r.Username, authData)
+		}
+
+		tbl.Print()
+	},
+}
+
+var findCmd = &cobra.Command{
+	Use:   "find [MAC]",
+	Short: "Find a MAC address in the RADIUS DB",
+	Args:  cobra.MinimumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		var entries []radius.RadCheck
+		res := db.Find(&entries, "username = ?", args[0])
+		if res.Error != nil {
+			fmt.Println("A DB error occured", res.Error)
+			return
+		}
+
+		headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
+		columnFmt := color.New(color.FgYellow).SprintfFunc()
+
+		tbl := table.New("ID", "Username", "Auth")
+		tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+
+		for _, r := range entries {
 			authData := fmt.Sprintf("%s %s %s", r.Attribute, r.Op, r.Value)
 			if authData == "Cleartext-Password := macauth" {
 				authData = "Authorized by MAC"
@@ -67,6 +101,7 @@ var addCmd = &cobra.Command{
 }
 
 func init() {
+	radusersCmd.AddCommand(findCmd)
 	radusersCmd.AddCommand(addCmd)
 	rootCmd.AddCommand(radusersCmd)
 }
