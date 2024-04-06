@@ -17,7 +17,7 @@ var (
 )
 
 var logsCmd = &cobra.Command{
-	Use:   "logs",
+	Use:   "logs [MAC - optional]",
 	Short: "Read authentication logs from the RADIUS database",
 	Run: func(cmd *cobra.Command, args []string) {
 		var results []radius.RadPostAuth
