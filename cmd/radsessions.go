@@ -31,21 +31,38 @@ var sessCmd = &cobra.Command{
 
 		query := db
 		if sessActive {
-			query = query.Where("acctupdatetime >= ?", time.Now().Add(-time.Hour)).Where("acctstoptime is null")
+			query = query.
+				Where("acctupdatetime >= ?", time.Now().Add(-time.Hour)).
+				Where("acctstoptime is null")
 		}
 		if len(args) > 0 {
 			query = query.Where("username = ?", args[0])
 		}
-		query.Order("acctupdatetime DESC").Limit(logLines).Find(&results, "acctupdatetime >= ?", time.Now().Add(-duration))
+		query.
+			Order("acctupdatetime DESC").
+			Limit(logLines).
+			Find(&results, "acctupdatetime >= ?", time.Now().Add(-duration))
 
 		headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
 		columnFmt := color.New(color.FgYellow).SprintfFunc()
 
-		tbl := table.New("ID", "Username", "AP", "Start", "Updated", "Stop", "Duration", "Uploaded", "Downloaded", "IP")
+		tbl := table.New("ID", "Username", "AP", "Start", "Updated",
+			"Stop", "Duration", "Uploaded", "Downloaded", "IP")
 		tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 		for _, r := range results {
-			tbl.AddRow(r.RadAcctId, r.Username, r.NASIPAddress, r.AcctStartTime, r.AcctUpdateTime, r.AcctStopTime, time.Second*time.Duration(r.AcctSessionTime), size.Capacity(r.AcctInputOctets)*size.Byte, size.Capacity(r.AcctOutputOctets)*size.Byte, r.FramedIPAddress)
+			tbl.AddRow(
+				r.RadAcctId,
+				r.Username,
+				r.NASIPAddress,
+				r.AcctStartTime,
+				r.AcctUpdateTime,
+				r.AcctStopTime,
+				time.Second*time.Duration(r.AcctSessionTime),
+				size.Capacity(r.AcctInputOctets)*size.Byte,
+				size.Capacity(r.AcctOutputOctets)*size.Byte,
+				r.FramedIPAddress,
+			)
 		}
 
 		tbl.Print()
@@ -53,8 +70,26 @@ var sessCmd = &cobra.Command{
 }
 
 func init() {
-	sessCmd.PersistentFlags().StringVar(&sessSince, "since", "168h", "Time to show recent logs for. Valid time units are “ns”, “us”, “ms”, “s”, “m”, “h”")
-	sessCmd.PersistentFlags().IntVarP(&sessLines, "lines", "n", 10, "How many lines to show. -1 means displaying all found")
-	sessCmd.PersistentFlags().BoolVarP(&sessActive, "active", "a", false, "Whether to only show current sessions")
+	sessCmd.PersistentFlags().StringVar(
+		&sessSince,
+		"since",
+		"168h",
+		"Time to show recent logs for. "+
+			"Valid time units are “ns”, “us”, “ms”, “s”, “m”, “h”",
+	)
+	sessCmd.PersistentFlags().IntVarP(
+		&sessLines,
+		"lines",
+		"n",
+		10,
+		"How many lines to show. -1 means displaying all found",
+	)
+	sessCmd.PersistentFlags().BoolVarP(
+		&sessActive,
+		"active",
+		"a",
+		false,
+		"Whether to only show current sessions",
+	)
 	rootCmd.AddCommand(sessCmd)
 }

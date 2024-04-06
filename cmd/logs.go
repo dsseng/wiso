@@ -31,7 +31,10 @@ var logsCmd = &cobra.Command{
 		if len(args) > 0 {
 			query = query.Where("username = ?", args[0])
 		}
-		query.Order("authdate DESC").Limit(logLines).Find(&results, "authdate >= ?", time.Now().Add(-duration))
+		query.
+			Order("authdate DESC").
+			Limit(logLines).
+			Find(&results, "authdate >= ?", time.Now().Add(-duration))
 
 		headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
 		columnFmt := color.New(color.FgYellow).SprintfFunc()
@@ -48,7 +51,17 @@ var logsCmd = &cobra.Command{
 }
 
 func init() {
-	logsCmd.PersistentFlags().StringVar(&logsSince, "since", "168h", "Time to show recent logs for. Valid time units are “ns”, “us”, “ms”, “s”, “m”, “h”")
-	logsCmd.PersistentFlags().IntVarP(&logLines, "lines", "n", 10, "How many lines to show. -1 means displaying all found")
+	logsCmd.PersistentFlags().StringVar(&logsSince,
+		"since",
+		"168h",
+		"Time to show recent logs for. "+
+			"Valid time units are “ns”, “us”, “ms”, “s”, “m”, “h”",
+	)
+	logsCmd.PersistentFlags().IntVarP(&logLines,
+		"lines",
+		"n",
+		10,
+		"How many lines to show. -1 means displaying all found",
+	)
 	rootCmd.AddCommand(logsCmd)
 }

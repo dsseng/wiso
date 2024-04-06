@@ -11,7 +11,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var macAddressRe = regexp.MustCompile(`(?m)^[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}$`)
+var macAddressRe = regexp.MustCompile(
+	`(?m)^[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}$`,
+)
 
 var radusersCmd = &cobra.Command{
 	Use:   "radusers",

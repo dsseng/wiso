@@ -15,8 +15,9 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "wiso",
-	Short: "Wiso is a modern network users manager using FreeRADIUS as the MAC auth backend",
+	Use: "wiso",
+	Short: "Wiso is a modern network users manager" +
+		"using FreeRADIUS as the MAC auth backend",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		var err error
 		db, err = gorm.Open(postgres.Open(dbAddress))
@@ -37,5 +38,12 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&dbAddress, "database", "d", "", "DSN to connect to DB, e.g. 'host=10.0.0.1 user=a password=b dbname=radius port=5432 sslmode=disable'")
+	rootCmd.PersistentFlags().StringVarP(
+		&dbAddress,
+		"database",
+		"d",
+		"",
+		"DSN to connect to DB, e.g. 'host=10.0.0.1 user=a"+
+			"password=b dbname=radius port=5432 sslmode=disable'",
+	)
 }
