@@ -29,7 +29,6 @@ var radusersCmd = &cobra.Command{
 
 		tbl.Print()
 	},
-	TraverseChildren: true,
 }
 
 var addCmd = &cobra.Command{
@@ -61,7 +60,6 @@ var addCmd = &cobra.Command{
 			fmt.Println("Added successfully, modified rows:", res.RowsAffected)
 		}
 	},
-	TraverseChildren: true,
 }
 
 func init() {
