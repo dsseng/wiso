@@ -108,8 +108,29 @@ var addCmd = &cobra.Command{
 	},
 }
 
+var delCmd = &cobra.Command{
+	Use:   "del [MAC]",
+	Short: "Delete a MAC address from the RADIUS DB (without disconnecting the client)",
+	Args:  cobra.MinimumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		var r radius.RadCheck
+		res := db.Where("username = ?", args[0]).Delete(&r)
+		if res.Error != nil {
+			fmt.Println("A DB error occured", res.Error)
+			return
+		}
+
+		if res.RowsAffected > 0 {
+			fmt.Println("Deleted, rows affected:", res.RowsAffected)
+		} else {
+			fmt.Println("Not found")
+		}
+	},
+}
+
 func init() {
 	radusersCmd.AddCommand(findCmd)
 	radusersCmd.AddCommand(addCmd)
+	radusersCmd.AddCommand(delCmd)
 	rootCmd.AddCommand(radusersCmd)
 }
