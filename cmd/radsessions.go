@@ -30,7 +30,7 @@ var sessCmd = &cobra.Command{
 
 		query := db
 		if sessActive {
-			query = query.Where("acctstoptime is null")
+			query = query.Where("acctupdatetime >= ?", time.Now().Add(-time.Hour)).Where("acctstoptime is null")
 		}
 		if len(args) > 0 {
 			query = query.Where("username = ?", args[0])
