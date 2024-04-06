@@ -24,7 +24,11 @@ var radusersCmd = &cobra.Command{
 		tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 		for _, r := range results {
-			tbl.AddRow(r.ID, r.Username, fmt.Sprintf("%s %s %s", r.Attribute, r.Op, r.Value))
+			authData := fmt.Sprintf("%s %s %s", r.Attribute, r.Op, r.Value)
+			if authData == "Cleartext-Password := macauth" {
+				authData = "Authorized by MAC"
+			}
+			tbl.AddRow(r.ID, r.Username, authData)
 		}
 
 		tbl.Print()
