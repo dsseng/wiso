@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/fatih/color"
 	"github.com/rodaine/table"
@@ -9,6 +10,8 @@ import (
 	"github.com/dsseng/wiso/pkg/radius"
 	"github.com/spf13/cobra"
 )
+
+var macAddressRe = regexp.MustCompile(`(?m)^[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}$`)
 
 var radusersCmd = &cobra.Command{
 	Use:   "radusers",
@@ -74,6 +77,11 @@ var addCmd = &cobra.Command{
 	Short: "Add a MAC address to the RADIUS DB",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		if !macAddressRe.MatchString(args[0]) {
+			fmt.Println("Not a valid MAC address, must be uppercase", args[0])
+			return
+		}
+
 		var entries []radius.RadCheck
 		res := db.Find(&entries, "username = ?", args[0])
 		if res.Error != nil {
