@@ -15,9 +15,9 @@ var macAddressRe = regexp.MustCompile(
 	`(?m)^[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}$`,
 )
 
-var radusersCmd = &cobra.Command{
-	Use:   "radusers",
-	Short: "Manage users in the RADIUS DB (typically MAC addresses)",
+var devCmd = &cobra.Command{
+	Use:   "dev",
+	Short: "Manage device MACs in the RADIUS DB",
 	Run: func(cmd *cobra.Command, args []string) {
 		var results []radius.RadCheck
 		res := db.Find(&results)
@@ -131,8 +131,8 @@ var delCmd = &cobra.Command{
 }
 
 func init() {
-	radusersCmd.AddCommand(findCmd)
-	radusersCmd.AddCommand(addCmd)
-	radusersCmd.AddCommand(delCmd)
-	rootCmd.AddCommand(radusersCmd)
+	devCmd.AddCommand(findCmd)
+	devCmd.AddCommand(addCmd)
+	devCmd.AddCommand(delCmd)
+	rootCmd.AddCommand(devCmd)
 }
