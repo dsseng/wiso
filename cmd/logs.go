@@ -27,7 +27,11 @@ var logsCmd = &cobra.Command{
 			return
 		}
 
-		db.Order("authdate DESC").Limit(logLines).Find(&results, "authdate >= ?", time.Now().Add(-duration))
+		query := db
+		if len(args) > 0 {
+			query = query.Where("username = ?", args[0])
+		}
+		query.Order("authdate DESC").Limit(logLines).Find(&results, "authdate >= ?", time.Now().Add(-duration))
 
 		headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
 		columnFmt := color.New(color.FgYellow).SprintfFunc()
