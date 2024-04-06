@@ -6,9 +6,10 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/rodaine/table"
+	"github.com/spf13/cobra"
+	"go.withmatt.com/size"
 
 	"github.com/dsseng/wiso/pkg/radius"
-	"github.com/spf13/cobra"
 )
 
 var (
@@ -40,11 +41,11 @@ var sessCmd = &cobra.Command{
 		headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
 		columnFmt := color.New(color.FgYellow).SprintfFunc()
 
-		tbl := table.New("ID", "Username", "AP", "Start", "Updated", "Stop", "Duration", "IN", "OUT", "IP")
+		tbl := table.New("ID", "Username", "AP", "Start", "Updated", "Stop", "Duration", "Uploaded", "Downloaded", "IP")
 		tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 		for _, r := range results {
-			tbl.AddRow(r.RadAcctId, r.Username, r.NASIPAddress, r.AcctStartTime, r.AcctUpdateTime, r.AcctStopTime, time.Second*time.Duration(r.AcctSessionTime), r.AcctInputOctets, r.AcctOutputOctets, r.FramedIPAddress)
+			tbl.AddRow(r.RadAcctId, r.Username, r.NASIPAddress, r.AcctStartTime, r.AcctUpdateTime, r.AcctStopTime, time.Second*time.Duration(r.AcctSessionTime), size.Capacity(r.AcctInputOctets)*size.Byte, size.Capacity(r.AcctOutputOctets)*size.Byte, r.FramedIPAddress)
 		}
 
 		tbl.Print()

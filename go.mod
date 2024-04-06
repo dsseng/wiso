@@ -6,6 +6,7 @@ require (
 	github.com/fatih/color v1.16.0
 	github.com/rodaine/table v1.2.0
 	github.com/spf13/cobra v1.8.0
+	go.withmatt.com/size v0.0.0-20221118222007-0d9da7819356
 	gorm.io/driver/postgres v1.5.7
 	gorm.io/gorm v1.25.9
 )
