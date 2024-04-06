@@ -166,8 +166,8 @@ sql {
 	#
 	server = "wiso-postgres"
 	port = 5432
-	login = "radius"
-	password = "radpass"
+	login = "postgres"
+	password = $ENV{POSTGRES_PASSWORD}
 
 	# Connection info for Mongo
 	# Authentication Without SSL
