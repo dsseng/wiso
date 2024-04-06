@@ -164,7 +164,7 @@ sql {
 
 	# Connection info:
 	#
-	server = "172.17.0.7"
+	server = "wiso-postgres"
 	port = 5432
 	login = "radius"
 	password = "radpass"
