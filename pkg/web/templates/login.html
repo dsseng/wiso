@@ -6,14 +6,19 @@
       <meta http-equiv="expires" content="-1" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>{{ .title }}</title>
-      <link rel="stylesheet" href="style.css">
-      <link rel="stylesheet" href="bulma.min.css">
+      <link rel="stylesheet" href="/static/style.css">
+      <link rel="stylesheet" href="/static/bulma.min.css">
   </head>
   <body class="has-background-info">
     <div class="hero is-tablet is-fullheight">
       <div class="hero-body columns is-centered">
         <div class="column is-12-mobile is-8-tablet is-4-widescreen">
           <form action="" class="box">
+            {{ if .image }}
+              <div class="field ma-6">
+                <img class="ma-6" src="{{ .image }}" />
+              </div>
+            {{ end }}
             {{ if .passwordAuth }}
               <div class="field">
                 <label for="" class="label">Username</label>

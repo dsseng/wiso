@@ -12,7 +12,7 @@ import (
 
 var (
 	db *gorm.DB
-	//go:embed templates/*
+	//go:embed templates
 	embedFS embed.FS
 )
 
@@ -22,32 +22,22 @@ func setupRouter() *gin.Engine {
 	templ := template.Must(
 		template.
 			New("").
-			ParseFS(embedFS, "templates/*"),
+			ParseFS(embedFS, "templates/*.html"),
 	)
 	r.SetHTMLTemplate(templ)
+	staticFS := http.FS(embedFS)
 
 	r.GET("login", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "login.html", gin.H{
 			"title":        "Network login",
 			"oidcName":     "Gitea",
 			"passwordAuth": false,
+			"image":        "/static/logo.png",
 		})
 	})
-	r.GET("style.css", func(c *gin.Context) {
-		file, _ := embedFS.ReadFile("templates/style.css")
-		c.Data(
-			http.StatusOK,
-			"text/css",
-			file,
-		)
-	})
-	r.GET("bulma.min.css", func(c *gin.Context) {
-		file, _ := embedFS.ReadFile("templates/bulma.min.css")
-		c.Data(
-			http.StatusOK,
-			"text/css",
-			file,
-		)
+	r.GET("/static/:path", func(c *gin.Context) {
+		fmt.Println(c.Param("path"))
+		c.FileFromFS("templates/static/"+c.Param("path"), staticFS)
 	})
 
 	return r
