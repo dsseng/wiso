@@ -3,20 +3,24 @@ package users
 import (
 	"time"
 
+	"github.com/dsseng/wiso/pkg/radius"
 	"gorm.io/gorm"
 )
 
 type DeviceSession struct {
 	gorm.Model
-	ID         uint64 `gorm:"primary_key;unique"`
 	UserID     uint
 	DueDate    time.Time
 	RadcheckID uint
 }
 
+func (s *DeviceSession) BeforeDelete(tx *gorm.DB) error {
+	tx.Delete(&radius.RadCheck{}, s.RadcheckID)
+	return nil
+}
+
 type User struct {
 	gorm.Model
-	ID             uint64 `gorm:"primary_key;unique"`
 	Username       string
 	Picture        string
 	FullName       string
