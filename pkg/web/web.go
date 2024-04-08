@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/dsseng/wiso/pkg/oidc"
+	"github.com/dsseng/wiso/pkg/users"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -63,6 +64,7 @@ func setupRouter() (*gin.Engine, error) {
 		Issuer:       os.Getenv("ISSUER"),
 		Name:         "oidc",
 		BaseURL:      baseURL,
+		DB:           db,
 	}
 
 	err := pr.Setup(r)
@@ -81,6 +83,8 @@ func Start(baseUrl string, database *gorm.DB) error {
 	}
 
 	db = database
+	db.AutoMigrate(&users.User{})
+	db.AutoMigrate(&users.DeviceSession{})
 
 	r, err := setupRouter()
 	if err != nil {
