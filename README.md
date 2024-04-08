@@ -15,6 +15,11 @@ docker run --net=wiso-net --name wiso-postgres -e POSTGRES_PASSWORD=internal_pas
 docker run --net=wiso-net --name wiso-radius -e POSTGRES_PASSWORD=internal_pass -e RADIUS_SECRET=mikrotik -p 1812-1813:1812-1813/udp --tmpfs /var/log/radius -d ghcr.io/dsseng/wiso-freeradius:latest
 ```
 
+```bash
+export CLIENT_ID=UUID CLIENT_SECRET=gto_ ISSUER=https://gitea.example.com/
+go run main.go -d "host=172.18.0.2 user=postgres password=internal_pass dbname=radius port=5432 sslmode=disable" web -u http://192.168.88.235:8989/
+```
+
 # Stop
 
 ```bash
