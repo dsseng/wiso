@@ -67,21 +67,23 @@ func setupRouter() *gin.Engine {
 			"oidcName":     "Gitea",
 			"passwordAuth": false,
 			"image":        "/static/logo.png",
+			"mac":          c.Query("mac"),
 		})
 	})
 
 	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, rp rp.RelyingParty, info *oidc.UserInfo) {
+		// put state as a mac into db
+		fmt.Println("logging in", info.PreferredUsername, state)
+
 		data, err := json.Marshal(info)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		fmt.Println(data, state)
 		w.Write(data)
 	}
 
-	// /oidc/login?sess= or ...?mac=
 	r.GET("/oidc/login", gin.WrapF(func(w http.ResponseWriter, r *http.Request) {
 		state := func() string {
 			return r.URL.Query().Get("mac")
