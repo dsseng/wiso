@@ -17,7 +17,7 @@ type OIDCProvider struct {
 	ClientID     string
 	ClientSecret string
 	Issuer       string
-	BaseURL      url.URL
+	BaseURL      *url.URL
 	Name         string
 
 	rp rp.RelyingParty

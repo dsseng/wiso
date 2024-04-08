@@ -18,10 +18,7 @@ var (
 	//go:embed templates
 	embedFS embed.FS
 	db      *gorm.DB
-	baseURL = url.URL{
-		Host:   "localhost:8989",
-		Scheme: "http",
-	}
+	baseURL *url.URL
 )
 
 func processUser(info *oidc.UserInfo, mac string) string {
@@ -36,7 +33,7 @@ func processUser(info *oidc.UserInfo, mac string) string {
 	return redir.String()
 }
 
-func setupRouter() *gin.Engine {
+func setupRouter() (*gin.Engine, error) {
 	r := gin.Default()
 	r.SetTrustedProxies([]string{})
 	templ := template.Must(
@@ -84,14 +81,27 @@ func setupRouter() *gin.Engine {
 
 	err := pr.Setup(r)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return r
+	return r, nil
 }
 
-func Start(port uint16, database *gorm.DB) {
+func Start(baseUrl string, database *gorm.DB) error {
+	var err error
+	baseURL, err = url.Parse(baseUrl)
+	if err != nil {
+		return err
+	}
+
 	db = database
-	r := setupRouter()
-	r.Run(fmt.Sprintf(":%d", port))
+
+	r, err := setupRouter()
+	if err != nil {
+		return err
+	}
+
+	r.Run(":" + baseURL.Port())
+
+	return nil
 }

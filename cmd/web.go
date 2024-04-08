@@ -8,24 +8,24 @@ import (
 )
 
 var (
-	webPort uint16
+	webUrl string
 )
 
 var webCmd = &cobra.Command{
 	Use:   "web",
 	Short: "Start a web interface to perform user auth and admin access",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Starting web server on port %d\n", webPort)
-		web.Start(webPort, db)
+		fmt.Printf("Starting web server as %v\n", webUrl)
+		web.Start(webUrl, db)
 	},
 }
 
 func init() {
-	webCmd.PersistentFlags().Uint16VarP(&webPort,
-		"port",
-		"p",
-		8989,
-		"Port to listen at",
+	webCmd.PersistentFlags().StringVarP(&webUrl,
+		"url",
+		"u",
+		"http://localhost:8989/",
+		"Specifies port and base address",
 	)
 	rootCmd.AddCommand(webCmd)
 }
