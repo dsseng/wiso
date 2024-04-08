@@ -6,6 +6,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/rodaine/table"
 
+	"github.com/dsseng/wiso/pkg/radius"
 	"github.com/dsseng/wiso/pkg/users"
 	"github.com/spf13/cobra"
 )
@@ -35,8 +36,8 @@ var userCmd = &cobra.Command{
 	},
 }
 
-var userFindCmd = &cobra.Command{
-	Use:   "find [username]",
+var userSessCmd = &cobra.Command{
+	Use:   "sess [username]",
 	Short: "Find the user",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -57,7 +58,49 @@ var userFindCmd = &cobra.Command{
 			tbl.AddRow(r.ID, r.Username, r.FullName, len(r.DeviceSessions), r.Picture)
 		}
 
-		tbl.Print()
+		if len(entries) > 0 {
+			tbl.Print()
+
+			headerFmt = color.New(color.FgGreen, color.Underline).SprintfFunc()
+			columnFmt = color.New(color.FgYellow).SprintfFunc()
+
+			tbl = table.New("Sess ID", "Dev ID", "MAC", "Expiry")
+			tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+
+			for _, r := range entries[0].DeviceSessions {
+				dev := radius.RadCheck{}
+				db.First(&dev, "id = ?", r.RadcheckID)
+				tbl.AddRow(r.ID, dev.ID, dev.Username, r.DueDate)
+			}
+
+			tbl.Print()
+		}
+	},
+}
+
+var userSessDelCmd = &cobra.Command{
+	Use:   "del [username]",
+	Short: "Delete all user's sessions",
+	Args:  cobra.MinimumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		var entries []users.User
+		res := db.Model(&users.User{}).Preload("DeviceSessions").Find(&entries, "username = ?", args[0])
+		if res.Error != nil {
+			fmt.Println("A DB error occured", res.Error)
+			return
+		}
+
+		if len(entries) > 0 {
+			if len(entries[0].DeviceSessions) > 0 {
+				res = db.Delete(&entries[0].DeviceSessions)
+				if res.Error != nil {
+					fmt.Println("A DB error occured", res.Error)
+					return
+				}
+			}
+		} else {
+			fmt.Println("Not found")
+		}
 	},
 }
 
@@ -99,7 +142,8 @@ var userDelCmd = &cobra.Command{
 }
 
 func init() {
-	userCmd.AddCommand(findCmd)
+	userSessCmd.AddCommand(userSessDelCmd)
+	userCmd.AddCommand(userSessCmd)
 	userCmd.AddCommand(userDelCmd)
 	rootCmd.AddCommand(userCmd)
 }
