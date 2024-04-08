@@ -1,22 +1,15 @@
 package web
 
 import (
-	"context"
 	"embed"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/http"
 	"net/url"
 	"os"
 
-	// "strings"
-	"time"
-
+	oidc_login "github.com/dsseng/wiso/pkg/oidc"
 	"github.com/gin-gonic/gin"
-	"github.com/zitadel/oidc/v3/pkg/client/rp"
-
-	// httphelper "github.com/zitadel/oidc/v3/pkg/http"
 	"github.com/zitadel/oidc/v3/pkg/oidc"
 	"gorm.io/gorm"
 )
@@ -25,46 +18,25 @@ var (
 	//go:embed templates
 	embedFS embed.FS
 	db      *gorm.DB
-	baseUrl = "http://localhost:8989"
+	baseURL = url.URL{
+		Host:   "localhost:8989",
+		Scheme: "http",
+	}
 )
 
 func processUser(info *oidc.UserInfo, mac string) string {
 	// put state as a mac into db
 	fmt.Println("logging in", info.PreferredUsername, mac)
-	ur, err := url.Parse(baseUrl)
-	if err != nil {
-		panic(err)
-	}
-	ur.Path = "/welcome"
-	query := ur.Query()
+	redir := baseURL
+	redir.Path = "/welcome"
+	query := redir.Query()
 	query.Add("username", info.PreferredUsername)
 	query.Add("picture", info.Picture)
-	ur.RawQuery = query.Encode()
-	return ur.String()
+	redir.RawQuery = query.Encode()
+	return redir.String()
 }
 
 func setupRouter() *gin.Engine {
-	clientID := os.Getenv("CLIENT_ID")
-	clientSecret := os.Getenv("CLIENT_SECRET")
-	issuer := os.Getenv("ISSUER")
-	redirectURI := fmt.Sprintf("%v%v", baseUrl, "/oidc/callback")
-
-	options := []rp.Option{
-		rp.WithVerifierOpts(rp.WithIssuedAtOffset(5 * time.Second)),
-	}
-	provider, err := rp.NewRelyingPartyOIDC(
-		context.TODO(),
-		issuer,
-		clientID,
-		clientSecret,
-		redirectURI,
-		[]string{"openid", "profile"},
-		options...,
-	)
-	if err != nil {
-		fmt.Printf("error creating provider %s", err.Error())
-	}
-
 	r := gin.Default()
 	r.SetTrustedProxies([]string{})
 	templ := template.Must(
@@ -80,6 +52,7 @@ func setupRouter() *gin.Engine {
 		c.FileFromFS("templates/static/"+c.Param("path"), staticFS)
 	})
 
+	// Args: mac of the device which is being authorized
 	r.GET("/login", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "login.html", gin.H{
 			"title":        "Network login",
@@ -90,6 +63,7 @@ func setupRouter() *gin.Engine {
 		})
 	})
 
+	// Args: picture URL and username to be displayed
 	r.GET("/welcome", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "welcome.html", gin.H{
 			"title":    "Success",
@@ -99,30 +73,19 @@ func setupRouter() *gin.Engine {
 		})
 	})
 
-	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, rp rp.RelyingParty, info *oidc.UserInfo) {
-		redir := processUser(info, state)
-		w.Header().Add("Location", redir)
-		w.WriteHeader(http.StatusSeeOther)
-
-		data, err := json.Marshal(info)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		w.Write(data)
+	pr := oidc_login.OIDCProvider{
+		ProcessUser:  processUser,
+		ClientID:     os.Getenv("CLIENT_ID"),
+		ClientSecret: os.Getenv("CLIENT_SECRET"),
+		Issuer:       os.Getenv("ISSUER"),
+		Name:         "oidc",
+		BaseURL:      baseURL,
 	}
 
-	r.GET("/oidc/login", gin.WrapF(func(w http.ResponseWriter, r *http.Request) {
-		state := func() string {
-			return r.URL.Query().Get("mac")
-		}
-		(rp.AuthURLHandler(
-			state,
-			provider,
-		))(w, r)
-	}))
-	r.GET("/oidc/callback", gin.WrapF(rp.CodeExchangeHandler(rp.UserinfoCallback(marshalUserinfo), provider)))
+	err := pr.Setup(r)
+	if err != nil {
+		panic(err)
+	}
 
 	return r
 }
