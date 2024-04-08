@@ -8,9 +8,8 @@ import (
 	"net/url"
 	"os"
 
-	oidc_login "github.com/dsseng/wiso/pkg/oidc"
+	"github.com/dsseng/wiso/pkg/oidc"
 	"github.com/gin-gonic/gin"
-	"github.com/zitadel/oidc/v3/pkg/oidc"
 	"gorm.io/gorm"
 )
 
@@ -20,18 +19,6 @@ var (
 	db      *gorm.DB
 	baseURL *url.URL
 )
-
-func processUser(info *oidc.UserInfo, mac string) string {
-	// put state as a mac into db
-	fmt.Println("logging in", info.PreferredUsername, mac)
-	redir := baseURL
-	redir.Path = "/welcome"
-	query := redir.Query()
-	query.Add("username", info.PreferredUsername)
-	query.Add("picture", info.Picture)
-	redir.RawQuery = query.Encode()
-	return redir.String()
-}
 
 func setupRouter() (*gin.Engine, error) {
 	r := gin.Default()
@@ -70,8 +57,7 @@ func setupRouter() (*gin.Engine, error) {
 		})
 	})
 
-	pr := oidc_login.OIDCProvider{
-		ProcessUser:  processUser,
+	pr := oidc.OIDCProvider{
 		ClientID:     os.Getenv("CLIENT_ID"),
 		ClientSecret: os.Getenv("CLIENT_SECRET"),
 		Issuer:       os.Getenv("ISSUER"),

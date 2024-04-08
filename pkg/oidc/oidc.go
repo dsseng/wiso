@@ -3,6 +3,7 @@ package oidc
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -13,7 +14,6 @@ import (
 )
 
 type OIDCProvider struct {
-	ProcessUser  func(info *oidc.UserInfo, mac string) string
 	ClientID     string
 	ClientSecret string
 	Issuer       string
@@ -21,6 +21,18 @@ type OIDCProvider struct {
 	Name         string
 
 	rp rp.RelyingParty
+}
+
+func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string) string {
+	// put state as a mac into db
+	fmt.Println("logging in", info.PreferredUsername, mac)
+	redir := p.BaseURL
+	redir.Path = "/welcome"
+	query := redir.Query()
+	query.Add("username", info.PreferredUsername)
+	query.Add("picture", info.Picture)
+	redir.RawQuery = query.Encode()
+	return redir.String()
 }
 
 func (p OIDCProvider) Setup(r *gin.Engine) error {
@@ -45,7 +57,7 @@ func (p OIDCProvider) Setup(r *gin.Engine) error {
 	}
 
 	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, rp rp.RelyingParty, info *oidc.UserInfo) {
-		redir := p.ProcessUser(info, state)
+		redir := p.processUser(info, state)
 		w.Header().Add("Location", redir)
 		w.WriteHeader(http.StatusSeeOther)
 
