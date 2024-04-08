@@ -1,0 +1,16 @@
+* {
+  /* #00004F */
+  --bulma-info-h: 240deg;
+  --bulma-info-s: 100%;
+  --bulma-info-l: 15%;
+
+  /* #809FCB */
+  --bulma-success-h: 215deg;
+  --bulma-success-s: 42%;
+  --bulma-success-l: 65%;
+
+  /* #004098 */
+  --bulma-primary-h: 215deg;
+  --bulma-primary-s: 100%;
+  --bulma-primary-l: 30%;
+}
