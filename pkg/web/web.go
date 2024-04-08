@@ -7,12 +7,15 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"net/url"
 	"os"
+
 	// "strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/zitadel/oidc/v3/pkg/client/rp"
+
 	// httphelper "github.com/zitadel/oidc/v3/pkg/http"
 	"github.com/zitadel/oidc/v3/pkg/oidc"
 	"gorm.io/gorm"
@@ -22,13 +25,29 @@ var (
 	//go:embed templates
 	embedFS embed.FS
 	db      *gorm.DB
+	baseUrl = "http://localhost:8989"
 )
+
+func processUser(info *oidc.UserInfo, mac string) string {
+	// put state as a mac into db
+	fmt.Println("logging in", info.PreferredUsername, mac)
+	ur, err := url.Parse(baseUrl)
+	if err != nil {
+		panic(err)
+	}
+	ur.Path = "/welcome"
+	query := ur.Query()
+	query.Add("username", info.PreferredUsername)
+	query.Add("picture", info.Picture)
+	ur.RawQuery = query.Encode()
+	return ur.String()
+}
 
 func setupRouter() *gin.Engine {
 	clientID := os.Getenv("CLIENT_ID")
 	clientSecret := os.Getenv("CLIENT_SECRET")
 	issuer := os.Getenv("ISSUER")
-	redirectURI := fmt.Sprintf("http://localhost:%v%v", 8989, "/oidc/callback")
+	redirectURI := fmt.Sprintf("%v%v", baseUrl, "/oidc/callback")
 
 	options := []rp.Option{
 		rp.WithVerifierOpts(rp.WithIssuedAtOffset(5 * time.Second)),
@@ -71,9 +90,19 @@ func setupRouter() *gin.Engine {
 		})
 	})
 
+	r.GET("/welcome", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "welcome.html", gin.H{
+			"title":    "Success",
+			"picture":  c.Query("picture"),
+			"username": c.Query("username"),
+			"logo":     "/static/logo-welcome.png",
+		})
+	})
+
 	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, rp rp.RelyingParty, info *oidc.UserInfo) {
-		// put state as a mac into db
-		fmt.Println("logging in", info.PreferredUsername, state)
+		redir := processUser(info, state)
+		w.Header().Add("Location", redir)
+		w.WriteHeader(http.StatusSeeOther)
 
 		data, err := json.Marshal(info)
 		if err != nil {
