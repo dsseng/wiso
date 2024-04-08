@@ -28,3 +28,11 @@ add address="10.12.12.0/24" gateway=10.12.12.1
 
 /radius
 add address=192.168.88.235 service=hotspot
+
+/ip hotspot walled-garden
+add comment="place hotspot rules here" disabled=yes
+add comment="captive portal" dst-host=192.168.88.235 dst-port=8989 server=server1
+add dst-host=:^gitea.example.com
+/ip hotspot walled-garden ip
+add action=accept disabled=no dst-address=192.168.88.235 !dst-address-list dst-port=8989 protocol=tcp server=server1 \
+    !src-address !src-address-list
