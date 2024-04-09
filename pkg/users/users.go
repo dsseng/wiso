@@ -12,6 +12,8 @@ type DeviceSession struct {
 	UserID     uint
 	DueDate    time.Time
 	RadcheckID uint
+	Inactive   bool
+	MAC        string
 }
 
 func (s *DeviceSession) BeforeDelete(tx *gorm.DB) error {

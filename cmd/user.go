@@ -81,17 +81,22 @@ var userSessCmd = &cobra.Command{
 			sessTable.WithHeaderFormatter(sessHeaderFmt).WithFirstColumnFormatter(sessColumnFmt)
 
 			for _, r := range entries[0].DeviceSessions {
-				dev := radius.RadCheck{}
-				res = db.First(&dev, "id = ?", r.RadcheckID)
-				if res.Error != nil {
-					fmt.Println("A DB error occured", res.Error)
-					return
-				}
-				if res.RowsAffected == 0 {
-					continue
-				}
-				tbl.AddRow(r.ID, dev.ID, dev.Username, r.DueDate)
+				if !r.Inactive {
 
+					dev := radius.RadCheck{}
+					res = db.Find(&dev, "id = ?", r.RadcheckID)
+					if res.Error != nil {
+						fmt.Println("A DB error occured", res.Error)
+						return
+					}
+					if res.RowsAffected == 0 {
+						continue
+					}
+					tbl.AddRow(r.ID, dev.ID, r.MAC, r.DueDate)
+				} else {
+					tbl.AddRow(r.ID, "inactive", r.MAC, r.DueDate)
+
+				}
 				query := db.Limit(userSessLines).Model(&[]radius.RadAcct{})
 				if userSessActive {
 					query = query.
@@ -99,7 +104,7 @@ var userSessCmd = &cobra.Command{
 						Where("acctstoptime is null")
 				}
 				acct := []radius.RadAcct{}
-				res = db.Find(&acct, "username = ?", dev.Username)
+				res = db.Find(&acct, "username = ?", r.MAC)
 				if res.Error != nil {
 					fmt.Println("A DB error occured", res.Error)
 					return
@@ -140,16 +145,29 @@ var userLogout = &cobra.Command{
 			return
 		}
 
-		if len(entries) > 0 {
-			if len(entries[0].DeviceSessions) > 0 {
-				res = db.Delete(&entries[0].DeviceSessions)
-				if res.Error != nil {
-					fmt.Println("A DB error occured", res.Error)
-					return
-				}
-			}
-		} else {
+		if len(entries) == 0 {
 			fmt.Println("Not found")
+			return
+		}
+		if len(entries[0].DeviceSessions) > 0 {
+			radchecks := []uint{}
+			for i := range entries[0].DeviceSessions {
+				fmt.Println(entries[0].DeviceSessions[i])
+				entries[0].DeviceSessions[i].Inactive = true
+				radchecks = append(radchecks, entries[0].DeviceSessions[i].RadcheckID)
+			}
+			fmt.Println(radchecks)
+			db.Save(&entries[0].DeviceSessions)
+			if len(radchecks) == 0 {
+				fmt.Println("Not found")
+				return
+			}
+			res = db.Delete(&[]radius.RadCheck{}, radchecks)
+			if res.Error != nil {
+				fmt.Println("A DB error occured", res.Error)
+				return
+			}
+			fmt.Println(res.RowsAffected)
 		}
 	},
 }

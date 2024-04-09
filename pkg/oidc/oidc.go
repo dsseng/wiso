@@ -60,6 +60,7 @@ func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string) string {
 	user[0].DeviceSessions = append(user[0].DeviceSessions, users.DeviceSession{
 		DueDate:    time.Now().Add(time.Hour * 168),
 		RadcheckID: radcheck.ID,
+		MAC:        mac,
 	})
 	p.DB.Save(user)
 
