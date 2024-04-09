@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/rodaine/table"
+	"go.withmatt.com/size"
 
 	"github.com/dsseng/wiso/pkg/radius"
 	"github.com/dsseng/wiso/pkg/users"
@@ -63,17 +65,60 @@ var userSessCmd = &cobra.Command{
 
 			headerFmt = color.New(color.FgGreen, color.Underline).SprintfFunc()
 			columnFmt = color.New(color.FgYellow).SprintfFunc()
+			sessHeaderFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
+			sessColumnFmt := color.New(color.FgYellow).SprintfFunc()
 
 			tbl = table.New("Sess ID", "Dev ID", "MAC", "Expiry")
 			tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
+			sessTable := table.New("ID", "Username", "AP", "Start", "Updated",
+				"Stop", "Duration", "Uploaded", "Downloaded", "IP")
+			sessTable.WithHeaderFormatter(sessHeaderFmt).WithFirstColumnFormatter(sessColumnFmt)
+
 			for _, r := range entries[0].DeviceSessions {
 				dev := radius.RadCheck{}
-				db.First(&dev, "id = ?", r.RadcheckID)
+				res = db.First(&dev, "id = ?", r.RadcheckID)
+				if res.Error != nil {
+					fmt.Println("A DB error occured", res.Error)
+					return
+				}
+				if res.RowsAffected == 0 {
+					continue
+				}
 				tbl.AddRow(r.ID, dev.ID, dev.Username, r.DueDate)
-			}
 
+				query := db.Model(&[]radius.RadAcct{})
+				if sessActive {
+					query = query.
+						Where("acctupdatetime >= ?", time.Now().Add(-time.Hour)).
+						Where("acctstoptime is null")
+				}
+				acct := []radius.RadAcct{}
+				res = db.Find(&acct, "username = ?", dev.Username)
+				if res.Error != nil {
+					fmt.Println("A DB error occured", res.Error)
+					return
+				}
+				query.Order("acctupdatetime DESC")
+
+				for _, r := range acct {
+					sessTable.AddRow(
+						r.RadAcctId,
+						r.Username,
+						r.NASIPAddress,
+						r.AcctStartTime,
+						r.AcctUpdateTime,
+						r.AcctStopTime,
+						time.Second*time.Duration(r.AcctSessionTime),
+						size.Capacity(r.AcctInputOctets)*size.Byte,
+						size.Capacity(r.AcctOutputOctets)*size.Byte,
+						r.FramedIPAddress,
+					)
+				}
+			}
 			tbl.Print()
+			sessTable.Print()
+
 		}
 	},
 }
