@@ -13,6 +13,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	userSessLines  int
+	userSessActive bool
+)
+
 var userCmd = &cobra.Command{
 	Use:   "user",
 	Short: "List and manage users",
@@ -87,8 +92,8 @@ var userSessCmd = &cobra.Command{
 				}
 				tbl.AddRow(r.ID, dev.ID, dev.Username, r.DueDate)
 
-				query := db.Model(&[]radius.RadAcct{})
-				if sessActive {
+				query := db.Limit(userSessLines).Model(&[]radius.RadAcct{})
+				if userSessActive {
 					query = query.
 						Where("acctupdatetime >= ?", time.Now().Add(-time.Hour)).
 						Where("acctstoptime is null")
@@ -187,6 +192,20 @@ var userDelCmd = &cobra.Command{
 }
 
 func init() {
+	userSessCmd.PersistentFlags().IntVarP(
+		&sessLines,
+		"lines",
+		"n",
+		10,
+		"How many lines to show. -1 means displaying all found",
+	)
+	userSessCmd.PersistentFlags().BoolVarP(
+		&sessActive,
+		"active",
+		"a",
+		false,
+		"Whether to only show current sessions",
+	)
 	userCmd.AddCommand(userSessCmd)
 	userCmd.AddCommand(userLogout)
 	userCmd.AddCommand(userDelCmd)
