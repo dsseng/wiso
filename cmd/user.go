@@ -211,14 +211,14 @@ var userDelCmd = &cobra.Command{
 
 func init() {
 	userSessCmd.PersistentFlags().IntVarP(
-		&sessLines,
+		&userSessLines,
 		"lines",
 		"n",
 		10,
 		"How many lines to show. -1 means displaying all found",
 	)
 	userSessCmd.PersistentFlags().BoolVarP(
-		&sessActive,
+		&userSessActive,
 		"active",
 		"a",
 		false,
