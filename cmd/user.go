@@ -154,11 +154,9 @@ var userLogout = &cobra.Command{
 		if len(entries[0].DeviceSessions) > 0 {
 			radchecks := []uint{}
 			for i := range entries[0].DeviceSessions {
-				fmt.Println(entries[0].DeviceSessions[i])
 				entries[0].DeviceSessions[i].Inactive = true
 				radchecks = append(radchecks, entries[0].DeviceSessions[i].RadcheckID)
 			}
-			fmt.Println(radchecks)
 			db.Save(&entries[0].DeviceSessions)
 			if len(radchecks) == 0 {
 				fmt.Println("Not found")
@@ -169,7 +167,6 @@ var userLogout = &cobra.Command{
 				fmt.Println("A DB error occured", res.Error)
 				return
 			}
-			fmt.Println(res.RowsAffected)
 		}
 	},
 }
