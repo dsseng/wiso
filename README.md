@@ -9,6 +9,8 @@ docker build -t ghcr.io/dsseng/wiso-postgres:latest contrib/postgres
 
 ## Run
 
+- `192.168.88.235` - IP of the server RADIUS and Wiso run on
+
 ```bash
 docker network create wiso-net
 docker run --net=wiso-net --name wiso-postgres -e POSTGRES_PASSWORD=internal_pass -d ghcr.io/dsseng/wiso-postgres:latest
@@ -27,6 +29,6 @@ docker stop wiso-postgres wiso-radius; docker rm wiso-postgres wiso-radius
 ```
 
 This project is developed, tested and deployed with MikroTik RouterOS-based hardware.
-Refer to `mikrotik-hotspot.rsc` for example on how to configure the hotspot for authentication.
+Refer to `contrib/mikrotik/hotspot.rsc` for example on how to configure the hotspot for authentication.
 
 Support for other devices should not be problematic thanks to RADIUS being widely accepted standard.
