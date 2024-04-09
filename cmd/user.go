@@ -78,9 +78,9 @@ var userSessCmd = &cobra.Command{
 	},
 }
 
-var userSessDelCmd = &cobra.Command{
-	Use:   "del [username]",
-	Short: "Delete all user's sessions",
+var userLogout = &cobra.Command{
+	Use:   "logout [username]",
+	Short: "Delete all user's sessions disallowing reconnect without auth",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var entries []users.User
@@ -142,8 +142,8 @@ var userDelCmd = &cobra.Command{
 }
 
 func init() {
-	userSessCmd.AddCommand(userSessDelCmd)
 	userCmd.AddCommand(userSessCmd)
+	userCmd.AddCommand(userLogout)
 	userCmd.AddCommand(userDelCmd)
 	rootCmd.AddCommand(userCmd)
 }
