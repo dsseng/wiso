@@ -49,6 +49,7 @@ func setupRouter() (*gin.Engine, error) {
 	})
 
 	// Args: picture URL, full_name and username to be displayed
+	// TODO: redirect to original page sent by captive portal
 	r.GET("/welcome", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "welcome.html", gin.H{
 			"title":     "Success",
