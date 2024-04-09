@@ -48,13 +48,14 @@ func setupRouter() (*gin.Engine, error) {
 		})
 	})
 
-	// Args: picture URL and username to be displayed
+	// Args: picture URL, full_name and username to be displayed
 	r.GET("/welcome", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "welcome.html", gin.H{
-			"title":    "Success",
-			"picture":  c.Query("picture"),
-			"username": c.Query("username"),
-			"logo":     "/static/logo-welcome.png",
+			"title":     "Success",
+			"picture":   c.Query("picture"),
+			"full_name": c.Query("full_name"),
+			"username":  c.Query("username"),
+			"logo":      "/static/logo-welcome.png",
 		})
 	})
 

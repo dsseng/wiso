@@ -43,7 +43,8 @@ func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string) string {
 	if res.RowsAffected == 0 {
 		// TODO: Groups?
 		user = []users.User{
-			{Username: username,
+			{
+				Username: username,
 				FullName: info.Name,
 				Picture:  info.Picture,
 			},
@@ -70,6 +71,7 @@ func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string) string {
 	redir.Path = "/welcome"
 	query := redir.Query()
 	query.Add("username", info.PreferredUsername)
+	query.Add("full_name", info.Name)
 	query.Add("picture", info.Picture)
 	redir.RawQuery = query.Encode()
 	return redir.String()

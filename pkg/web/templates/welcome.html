@@ -19,9 +19,18 @@
                 <img style="max-width: 200px;" class="is-column" src="{{ .logo }}" />
               </div>
             {{ end }}
-            <div class="field ma-6 columns is-mobile is-centered">
-              <div class="is-column">Welcome {{ .username }}</div>
-            </div>
+            {{ if .full_name }}
+              <div class="field ma-6 columns is-mobile is-centered">
+                <div class="is-column">Welcome {{ .full_name }}</div>
+              </div>
+              <div class="field ma-6 columns is-mobile is-centered">
+                <div class="is-column">{{ .username }}</div>
+              </div>
+            {{ else }}
+              <div class="field ma-6 columns is-mobile is-centered">
+                <div class="is-column">Welcome {{ .username }}</div>
+              </div>
+            {{ end }}
             {{ if .picture }}
               <div class="field columns is-mobile is-centered">
                 <img style="max-width: 50px;" class="is-column" src="{{ .picture }}" />
