@@ -28,9 +28,6 @@ type OIDCProvider struct {
 }
 
 func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string) string {
-	// put state as a mac into db
-	fmt.Println("logging in", info.PreferredUsername, mac)
-
 	username := info.PreferredUsername + "@" + p.Name
 	user := []users.User{{}}
 	res := p.DB.Limit(1).Find(&user, "username = ?", username)
