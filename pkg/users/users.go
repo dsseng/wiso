@@ -9,7 +9,8 @@ import (
 
 type DeviceSession struct {
 	gorm.Model
-	UserID     uint
+	UserID uint
+	// TODO: add a job to clean up based on due date
 	DueDate    time.Time
 	RadcheckID uint
 	Inactive   bool
