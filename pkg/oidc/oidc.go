@@ -28,6 +28,7 @@ type OIDCProvider struct {
 }
 
 func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string) string {
+	// TODO: Factor out find or create
 	username := info.PreferredUsername + "@" + p.Name
 	user := []users.User{{}}
 	res := p.DB.Limit(1).Find(&user, "username = ?", username)
@@ -40,7 +41,7 @@ func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string) string {
 	}
 
 	if res.RowsAffected == 0 {
-		// Groups?
+		// TODO: Groups?
 		user = []users.User{
 			{Username: username,
 				FullName: info.Name,
@@ -49,6 +50,7 @@ func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string) string {
 		}
 	}
 
+	// TODO: Factor out login
 	radcheck := radius.RadCheck{
 		Username:  mac,
 		Attribute: "Cleartext-Password",

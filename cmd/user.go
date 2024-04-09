@@ -13,6 +13,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// TODO: Factor out all lookup functions
+
 var (
 	userSessLines  int
 	userSessActive bool
