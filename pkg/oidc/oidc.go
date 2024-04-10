@@ -22,6 +22,7 @@ type OIDCProvider struct {
 	ClientSecret string
 	Issuer       string
 	BaseURL      *url.URL
+	ID           string
 	Name         string
 	DB           *gorm.DB
 
@@ -30,7 +31,7 @@ type OIDCProvider struct {
 
 func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string, linkOrig string) string {
 	// TODO: Factor out find or create
-	username := info.PreferredUsername + "@" + p.Name
+	username := info.PreferredUsername + "@" + p.ID
 	user := []users.User{{}}
 	res := p.DB.Limit(1).Find(&user, "username = ?", username)
 	if res.Error != nil {
@@ -99,7 +100,7 @@ func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string, linkOrig stri
 }
 
 func (p OIDCProvider) Setup(r *gin.Engine) error {
-	callbackPath := "/" + p.Name + "/callback"
+	callbackPath := "/" + p.ID + "/callback"
 	redirectURI := p.BaseURL
 	redirectURI.Path = callbackPath
 
@@ -145,7 +146,7 @@ func (p OIDCProvider) Setup(r *gin.Engine) error {
 		w.Write(data)
 	}
 
-	r.GET("/"+p.Name+"/login", gin.WrapF(func(w http.ResponseWriter, r *http.Request) {
+	r.GET("/"+p.ID+"/login", gin.WrapF(func(w http.ResponseWriter, r *http.Request) {
 		state := func() string {
 			return r.URL.Query().Get("mac") + "^" + r.URL.Query().Get("link-orig")
 		}

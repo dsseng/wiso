@@ -2,11 +2,9 @@ package web
 
 import (
 	"embed"
-	"fmt"
 	"html/template"
 	"net/http"
 	"net/url"
-	"os"
 
 	"github.com/dsseng/wiso/pkg/oidc"
 	"github.com/dsseng/wiso/pkg/users"
@@ -14,14 +12,23 @@ import (
 	"gorm.io/gorm"
 )
 
+type App struct {
+	BaseURL      *url.URL
+	DB           *gorm.DB
+	OIDC         *oidc.OIDCProvider
+	PasswordAuth bool
+	LogoLogin    string
+	LogoWelcome  string
+	LogoError    string
+	SupportURL   string
+}
+
 var (
 	//go:embed templates
 	embedFS embed.FS
-	db      *gorm.DB
-	baseURL *url.URL
 )
 
-func setupRouter() (*gin.Engine, error) {
+func (a App) setupRouter() (*gin.Engine, error) {
 	r := gin.Default()
 	r.SetTrustedProxies([]string{})
 	templ := template.Must(
@@ -33,7 +40,6 @@ func setupRouter() (*gin.Engine, error) {
 	staticFS := http.FS(embedFS)
 
 	r.GET("/static/:path", func(c *gin.Context) {
-		fmt.Println(c.Param("path"))
 		c.FileFromFS("templates/static/"+c.Param("path"), staticFS)
 	})
 
@@ -41,9 +47,10 @@ func setupRouter() (*gin.Engine, error) {
 	r.GET("/login", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "login.html", gin.H{
 			"title":        "Network login",
-			"oidcName":     "Gitea",
-			"passwordAuth": false,
-			"image":        "/static/logo.png",
+			"oidcID":       a.OIDC.ID,
+			"oidcName":     a.OIDC.Name,
+			"passwordAuth": a.PasswordAuth,
+			"image":        a.LogoLogin,
 			"mac":          c.Query("mac"),
 			"redirectURL":  c.Query("link-orig"),
 		})
@@ -56,7 +63,7 @@ func setupRouter() (*gin.Engine, error) {
 			"picture":   c.Query("picture"),
 			"full_name": c.Query("full_name"),
 			"username":  c.Query("username"),
-			"logo":      "/static/logo-welcome.png",
+			"logo":      a.LogoWelcome,
 		})
 	})
 
@@ -65,21 +72,15 @@ func setupRouter() (*gin.Engine, error) {
 		c.HTML(http.StatusOK, "error.html", gin.H{
 			"title":   "Error",
 			"error":   c.Query("error"),
-			"logo":    "/static/logo-error.png",
-			"support": "https://github.com/dsseng",
+			"logo":    a.LogoError,
+			"support": a.SupportURL,
 		})
 	})
 
-	pr := oidc.OIDCProvider{
-		ClientID:     os.Getenv("CLIENT_ID"),
-		ClientSecret: os.Getenv("CLIENT_SECRET"),
-		Issuer:       os.Getenv("ISSUER"),
-		Name:         "oidc",
-		BaseURL:      baseURL,
-		DB:           db,
-	}
+	a.OIDC.BaseURL = a.BaseURL
+	a.OIDC.DB = a.DB
 
-	err := pr.Setup(r)
+	err := a.OIDC.Setup(r)
 	if err != nil {
 		return nil, err
 	}
@@ -87,23 +88,16 @@ func setupRouter() (*gin.Engine, error) {
 	return r, nil
 }
 
-func Start(baseUrl string, database *gorm.DB) error {
-	var err error
-	baseURL, err = url.Parse(baseUrl)
+func (a App) Start() error {
+	a.DB.AutoMigrate(&users.User{})
+	a.DB.AutoMigrate(&users.DeviceSession{})
+
+	r, err := a.setupRouter()
 	if err != nil {
 		return err
 	}
 
-	db = database
-	db.AutoMigrate(&users.User{})
-	db.AutoMigrate(&users.DeviceSession{})
-
-	r, err := setupRouter()
-	if err != nil {
-		return err
-	}
-
-	r.Run(":" + baseURL.Port())
+	r.Run(":" + a.BaseURL.Port())
 
 	return nil
 }
