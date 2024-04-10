@@ -5,51 +5,60 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/dsseng/wiso/pkg/oidc"
 	"github.com/dsseng/wiso/pkg/web"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 var (
-	webUrl string
+	configPath string
 )
 
 var webCmd = &cobra.Command{
 	Use:   "web",
 	Short: "Start a web interface to perform user auth and admin access",
 	Run: func(cmd *cobra.Command, args []string) {
-		url, err := url.Parse(webUrl)
-		if err != nil {
-			fmt.Println("Error parsing URL: ", err.Error())
-			return
-		}
-		fmt.Printf("Starting web server as %v\n", webUrl)
 		app := web.App{
-			DB:      db,
-			BaseURL: url,
-			OIDC: &oidc.OIDCProvider{
-				ClientID:     os.Getenv("CLIENT_ID"),
-				ClientSecret: os.Getenv("CLIENT_SECRET"),
-				Issuer:       os.Getenv("ISSUER"),
-				ID:           "gitea",
-				Name:         "Gitea",
-			},
-			PasswordAuth: false,
+			DB:           db,
+			Base:         "http://localhost:8989/",
+			OIDC:         nil,
+			PasswordAuth: true,
 			LogoLogin:    "/static/logo.png",
 			LogoWelcome:  "/static/logo-welcome.png",
 			LogoError:    "/static/logo-error.png",
 			SupportURL:   "https://github.com/dsseng",
 		}
+		data, err := os.ReadFile(configPath)
+		if err != nil {
+			fmt.Printf("Error reading config file: %v\n", err)
+			return
+		}
+
+		if err := yaml.Unmarshal(data, &app); err != nil {
+			fmt.Printf("Error unmarshaling config: %v\n", err)
+			return
+		}
+
+		app.BaseURL, err = url.Parse(app.Base)
+		if err != nil {
+			fmt.Printf("Error parsing URL: %v\n", err)
+			return
+		}
+
+		fmt.Println(app)
+		fmt.Println(app.OIDC)
+
+		fmt.Printf("Starting web server as %v\n", app.BaseURL.String())
 		app.Start()
 	},
 }
 
 func init() {
-	webCmd.PersistentFlags().StringVarP(&webUrl,
-		"url",
-		"u",
-		"http://localhost:8989/",
-		"Specifies port and base address",
+	webCmd.PersistentFlags().StringVarP(&configPath,
+		"config",
+		"c",
+		"config.yaml",
+		"Specifies path to the config",
 	)
 	rootCmd.AddCommand(webCmd)
 }

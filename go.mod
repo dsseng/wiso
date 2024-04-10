@@ -9,6 +9,7 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/zitadel/oidc/v3 v3.19.0
 	go.withmatt.com/size v0.0.0-20221118222007-0d9da7819356
+	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/postgres v1.5.7
 	gorm.io/gorm v1.25.9
 )
@@ -62,5 +63,4 @@ require (
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

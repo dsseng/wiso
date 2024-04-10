@@ -13,14 +13,15 @@ import (
 )
 
 type App struct {
+	Base         string `yaml:"base"` // Used by CLI
 	BaseURL      *url.URL
 	DB           *gorm.DB
 	OIDC         *oidc.OIDCProvider
-	PasswordAuth bool
-	LogoLogin    string
-	LogoWelcome  string
-	LogoError    string
-	SupportURL   string
+	PasswordAuth bool   `yaml:"password_auth"`
+	LogoLogin    string `yaml:"logo_login"`
+	LogoWelcome  string `yaml:"logo_welcome"`
+	LogoError    string `yaml:"logo_error"`
+	SupportURL   string `yaml:"support_url"`
 }
 
 var (
@@ -45,10 +46,17 @@ func (a App) setupRouter() (*gin.Engine, error) {
 
 	// Args: mac of the device which is being authorized
 	r.GET("/login", func(c *gin.Context) {
+		oidcID := ""
+		oidcName := ""
+		if a.OIDC != nil {
+			oidcID = a.OIDC.ID
+			oidcName = a.OIDC.Name
+		}
+
 		c.HTML(http.StatusOK, "login.html", gin.H{
 			"title":        "Network login",
-			"oidcID":       a.OIDC.ID,
-			"oidcName":     a.OIDC.Name,
+			"oidcID":       oidcID,
+			"oidcName":     oidcName,
 			"passwordAuth": a.PasswordAuth,
 			"image":        a.LogoLogin,
 			"mac":          c.Query("mac"),
@@ -77,12 +85,14 @@ func (a App) setupRouter() (*gin.Engine, error) {
 		})
 	})
 
-	a.OIDC.BaseURL = a.BaseURL
-	a.OIDC.DB = a.DB
+	if a.OIDC != nil {
+		a.OIDC.BaseURL = a.BaseURL
+		a.OIDC.DB = a.DB
 
-	err := a.OIDC.Setup(r)
-	if err != nil {
-		return nil, err
+		err := a.OIDC.Setup(r)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return r, nil

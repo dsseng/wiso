@@ -18,9 +18,9 @@ import (
 )
 
 type OIDCProvider struct {
-	ClientID     string
-	ClientSecret string
-	Issuer       string
+	ClientID     string `yaml:"client_id"`
+	ClientSecret string `yaml:"client_secret"`
+	Issuer       string `yaml:"issuer"`
 	BaseURL      *url.URL
 	ID           string
 	Name         string
