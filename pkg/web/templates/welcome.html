@@ -36,12 +36,28 @@
                 <img style="max-width: 50px;" class="is-column" src="{{ .picture }}" />
               </div>
             {{ end }}
-            <div class="field ma-6 columns is-mobile is-centered">
+            <div class="field my-3 columns is-mobile is-centered">
+              <progress class="progress is-success" id="redirection" value="0" max="100"></progress>
+            </div>
+            <div class="field my-3 columns is-mobile is-centered">
               <div class="is-column">Please update the page to proceed</div>
             </div>
           </form>
         </div>
       </div>
     </div>
+    <script>
+      let progress = 0;
+      let params = new URL(document.location.toString()).searchParams;
+      let redir = params.get("link-orig");
+      setInterval(function () {
+        if (progress < 100) {
+          progress += 100 * 50 / 15000; // 15s timeout
+          document.querySelector("#redirection").value = progress;
+        } else if (redir) {
+          window.location.replace(redir);
+        }
+      }, 50)
+    </script>
   </body>
 </html>

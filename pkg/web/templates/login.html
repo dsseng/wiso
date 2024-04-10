@@ -36,7 +36,7 @@
             {{ end }}
             {{ if .oidcName }}
               <div class="field my-2 columns is-mobile is-centered">
-                <a href="/oidc/login?mac={{ .mac }}" class="button is-small is-outlined column is-8-mobile is-6-tablet is-6-widescreen is-4-fullhd is-primary">
+                <a href="/oidc/login?mac={{ .mac }}&link-orig={{ .redirectURL }}" class="button is-small is-outlined column is-8-mobile is-6-tablet is-6-widescreen is-4-fullhd is-primary">
                   Continue with {{ .oidcName }}
                 </a>
               </div>

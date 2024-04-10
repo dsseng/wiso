@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/dsseng/wiso/pkg/radius"
@@ -27,7 +28,7 @@ type OIDCProvider struct {
 	rp rp.RelyingParty
 }
 
-func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string) string {
+func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string, linkOrig string) string {
 	// TODO: Factor out find or create
 	username := info.PreferredUsername + "@" + p.Name
 	user := []users.User{{}}
@@ -86,6 +87,7 @@ func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string) string {
 	query := redir.Query()
 	query.Add("username", info.PreferredUsername)
 	query.Add("full_name", info.Name)
+	query.Add("link-orig", linkOrig)
 	query.Add("picture", info.Picture)
 	redir.RawQuery = query.Encode()
 	return redir.String()
@@ -113,7 +115,8 @@ func (p OIDCProvider) Setup(r *gin.Engine) error {
 	}
 
 	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, rp rp.RelyingParty, info *oidc.UserInfo) {
-		redir := p.processUser(info, state)
+		pos := strings.Index(state, "^")
+		redir := p.processUser(info, state[:pos], state[pos+1:])
 		w.Header().Add("Location", redir)
 		w.WriteHeader(http.StatusSeeOther)
 
@@ -128,7 +131,7 @@ func (p OIDCProvider) Setup(r *gin.Engine) error {
 
 	r.GET("/"+p.Name+"/login", gin.WrapF(func(w http.ResponseWriter, r *http.Request) {
 		state := func() string {
-			return r.URL.Query().Get("mac")
+			return r.URL.Query().Get("mac") + "^" + r.URL.Query().Get("link-orig")
 		}
 		(rp.AuthURLHandler(
 			state,
