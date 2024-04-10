@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+  <head>
+      <meta charset="utf-8">
+      <meta http-equiv="pragma" content="no-cache" />
+      <meta http-equiv="expires" content="-1" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>{{ .title }}</title>
+      <link rel="stylesheet" href="/static/style.css">
+      <link rel="stylesheet" href="/static/bulma.min.css">
+  </head>
+  <body class="has-background-info">
+    <div class="hero is-tablet is-fullheight">
+      <div class="hero-body columns is-centered">
+        <div class="column is-12-mobile is-8-tablet is-4-widescreen">
+          <form action="" class="box">
+            {{ if .logo }}
+              <div class="field columns is-mobile is-centered">
+                <img style="max-width: 200px;" class="is-column" src="{{ .logo }}" />
+              </div>
+            {{ end }}
+            <div class="field my-1 columns is-mobile is-centered">
+              <div class="is-column">An error occured</div>
+            </div>
+            {{ if .error }}
+              <div class="field my-1 columns is-mobile is-centered">
+                <div class="is-column">{{ .error }}</div>
+              </div>
+            {{ end }}
+            {{ if .support }}
+              <div class="field my-1 columns is-mobile is-centered">
+                <div class="is-column">Please contact <a href="{{ .support }}">Support</a></div>
+              </div>
+            {{ end }}
+          </form>
+        </div>
+      </div>
+    </div>
+    <script>
+      let progress = 0;
+      let params = new URL(document.location.toString()).searchParams;
+      let redir = params.get("link-orig");
+      setInterval(function () {
+        if (progress < 100) {
+          progress += 100 * 50 / 15000; // 15s timeout
+          document.querySelector("#redirection").value = progress;
+        } else if (redir) {
+          window.location.replace(redir);
+        }
+      }, 50)
+    </script>
+  </body>
+</html>

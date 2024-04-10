@@ -60,6 +60,16 @@ func setupRouter() (*gin.Engine, error) {
 		})
 	})
 
+	// Args: error to be displayed
+	r.GET("/error", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "error.html", gin.H{
+			"title":   "Success",
+			"error":   c.Query("error"),
+			"logo":    "/static/logo-error.png",
+			"support": "https://github.com/dsseng",
+		})
+	})
+
 	pr := oidc.OIDCProvider{
 		ClientID:     os.Getenv("CLIENT_ID"),
 		ClientSecret: os.Getenv("CLIENT_SECRET"),
