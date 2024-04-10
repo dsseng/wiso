@@ -36,7 +36,9 @@ func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string, linkOrig stri
 	if res.Error != nil {
 		fmt.Println("A DB error occured", res.Error)
 		redir := p.BaseURL
-		// TODO: add an error page
+		query := redir.Query()
+		query.Add("error", res.Error.Error())
+		redir.RawQuery = query.Encode()
 		redir.Path = "/error"
 		return redir.String()
 	}
@@ -65,6 +67,9 @@ func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string, linkOrig stri
 			fmt.Println("A DB error occured", res.Error)
 			redir := p.BaseURL
 			redir.Path = "/error"
+			query := redir.Query()
+			query.Add("error", res.Error.Error())
+			redir.RawQuery = query.Encode()
 			return redir.String()
 		}
 
@@ -117,7 +122,14 @@ func (p OIDCProvider) Setup(r *gin.Engine) error {
 	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, rp rp.RelyingParty, info *oidc.UserInfo) {
 		pos := strings.Index(state, "^")
 		if pos == -1 {
-			http.Error(w, "Unknown auth state", http.StatusInternalServerError)
+			fmt.Println("Unknown auth state")
+			redir := p.BaseURL
+			redir.Path = "/error"
+			query := redir.Query()
+			query.Add("error", "Unknown auth state")
+			redir.RawQuery = query.Encode()
+			w.Header().Add("Location", redir.String())
+			w.WriteHeader(http.StatusSeeOther)
 			return
 		}
 		redir := p.processUser(info, state[:pos], state[pos+1:])
