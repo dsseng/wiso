@@ -116,6 +116,10 @@ func (p OIDCProvider) Setup(r *gin.Engine) error {
 
 	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, rp rp.RelyingParty, info *oidc.UserInfo) {
 		pos := strings.Index(state, "^")
+		if pos == -1 {
+			http.Error(w, "Unknown auth state", http.StatusInternalServerError)
+			return
+		}
 		redir := p.processUser(info, state[:pos], state[pos+1:])
 		w.Header().Add("Location", redir)
 		w.WriteHeader(http.StatusSeeOther)
