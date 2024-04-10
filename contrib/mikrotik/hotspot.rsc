@@ -14,7 +14,7 @@ add name=hs-dhcp ranges=10.12.12.10-10.12.12.230
 add address-pool=hs-dhcp interface=hs_bridge lease-time=1h name=server1
 
 /ip hotspot
-add address-pool=hs-dhcp addresses-per-mac=unlimited disabled=no idle-timeout=1m interface=hs_bridge keepalive-timeout=30s login-timeout=10s name=server1
+add address-pool=hs-dhcp addresses-per-mac=unlimited disabled=no idle-timeout=1m interface=hs_bridge keepalive-timeout=30s login-timeout=5s name=server1
 
 /interface bridge port
 remove [ find bridge=bridge comment=defconf interface=wifi1 internal-path-cost=10 path-cost=10 ]
