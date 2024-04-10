@@ -1,0 +1,12 @@
+base: http://192.168.88.235:8989/
+oidc:
+  client_id:     UUID
+  client_secret: gto_
+  issuer:        https://gitea.example.com/
+  id:            gitea
+  name:          Gitea
+password_auth: true
+logo_login:    /static/logo.png
+logo_welcome:  /static/logo-welcome.png
+logo_error:    /static/logo-error.png
+support_url:   https://github.com/dsseng
