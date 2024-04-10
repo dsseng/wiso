@@ -13,8 +13,9 @@ import (
 )
 
 type App struct {
-	Base         string `yaml:"base"` // Used by CLI
+	Base         string // Used by CLI
 	BaseURL      *url.URL
+	Database     string // Used by CLI
 	DB           *gorm.DB
 	OIDC         *oidc.OIDCProvider
 	PasswordAuth bool   `yaml:"password_auth"`

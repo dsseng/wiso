@@ -5,12 +5,15 @@
 ```bash
 docker build -t ghcr.io/dsseng/wiso-freeradius:latest contrib/radius
 docker build -t ghcr.io/dsseng/wiso-postgres:latest contrib/postgres
+
+go build .
 ```
 
 ## Run
 
 - `192.168.88.235` - IP of the server RADIUS and Wiso run on
 - `gitea.example.com` - sample OIDC provider
+- `internal_pass` - PostgreSQL password
 
 ```bash
 docker network create wiso-net
@@ -19,7 +22,7 @@ docker run --net=wiso-net --name wiso-radius -e POSTGRES_PASSWORD=internal_pass 
 ```
 
 ```bash
-go run main.go -d "host=172.18.0.2 user=postgres password=internal_pass dbname=radius port=5432 sslmode=disable" web -c config.yaml
+./wiso web -c config.yaml
 ```
 
 # Stop

@@ -8,6 +8,8 @@ import (
 	"github.com/dsseng/wiso/pkg/web"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 var (
@@ -19,6 +21,7 @@ var webCmd = &cobra.Command{
 	Short: "Start a web interface to perform user auth and admin access",
 	Run: func(cmd *cobra.Command, args []string) {
 		app := web.App{
+			Database:     "",
 			DB:           db,
 			Base:         "http://localhost:8989/",
 			OIDC:         nil,
@@ -45,8 +48,13 @@ var webCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println(app)
-		fmt.Println(app.OIDC)
+		if app.DB == nil {
+			var err error
+			app.DB, err = gorm.Open(postgres.Open(app.Database))
+			if err != nil {
+				fmt.Println("Failed to connect database", err)
+			}
+		}
 
 		fmt.Printf("Starting web server as %v\n", app.BaseURL.String())
 		app.Start()

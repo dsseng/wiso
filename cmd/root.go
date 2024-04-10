@@ -19,6 +19,10 @@ var rootCmd = &cobra.Command{
 	Short: "Wiso is a modern network users manager" +
 		"using FreeRADIUS as the MAC auth backend",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if dbAddress == "" {
+			fmt.Println("Warning: you have to supply DB address for CLI")
+			return
+		}
 		var err error
 		db, err = gorm.Open(postgres.Open(dbAddress))
 		if err != nil {
