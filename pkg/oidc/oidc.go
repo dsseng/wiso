@@ -51,21 +51,35 @@ func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string) string {
 		}
 	}
 
-	// TODO: Factor out login
-	radcheck := radius.RadCheck{
-		Username:  mac,
-		Attribute: "Cleartext-Password",
-		Op:        ":=",
-		Value:     "macauth",
-	}
-	p.DB.Create(&radcheck)
+	if mac != "" {
+		// TODO: Factor out login
+		radcheck := radius.RadCheck{
+			Username:  mac,
+			Attribute: "Cleartext-Password",
+			Op:        ":=",
+			Value:     "macauth",
+		}
+		res = p.DB.Create(&radcheck)
+		if res.Error != nil {
+			fmt.Println("A DB error occured", res.Error)
+			redir := p.BaseURL
+			redir.Path = "/error"
+			return redir.String()
+		}
 
-	user[0].DeviceSessions = append(user[0].DeviceSessions, users.DeviceSession{
-		DueDate:    time.Now().Add(time.Hour * 168),
-		RadcheckID: radcheck.ID,
-		MAC:        mac,
-	})
-	p.DB.Save(user)
+		user[0].DeviceSessions = append(user[0].DeviceSessions, users.DeviceSession{
+			DueDate:    time.Now().Add(time.Hour * 168),
+			RadcheckID: radcheck.ID,
+			MAC:        mac,
+		})
+	}
+	res = p.DB.Save(user)
+	if res.Error != nil {
+		fmt.Println("A DB error occured", res.Error)
+		redir := p.BaseURL
+		redir.Path = "/error"
+		return redir.String()
+	}
 
 	redir := p.BaseURL
 	redir.Path = "/welcome"
