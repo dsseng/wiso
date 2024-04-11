@@ -1,11 +1,11 @@
 base: http://192.168.88.235:8989/
 database: host=wiso-postgres user=postgres password=internal_pass dbname=radius port=5432 sslmode=disable
-oidc:
-  client_id:     UUID
-  client_secret: gto_
-  issuer:        https://gitea.example.com/
-  id:            gitea
-  name:          Gitea
+#oidc:
+#  client_id:     UUID
+#  client_secret: gto_
+#  issuer:        https://gitea.example.com/
+#  id:            gitea
+#  name:          Gitea
 password_auth: true
 logo_login:    /static/logo.png
 logo_welcome:  /static/logo-welcome.png
