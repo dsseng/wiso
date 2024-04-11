@@ -57,7 +57,10 @@ var webCmd = &cobra.Command{
 		}
 
 		fmt.Printf("Starting web server as %v\n", app.BaseURL.String())
-		app.Start()
+		err = app.Start()
+		if err != nil {
+			fmt.Println("Failed to start web server", err)
+		}
 	},
 }
 
