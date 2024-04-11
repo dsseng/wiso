@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"runtime/debug"
 
 	"github.com/dsseng/wiso/pkg/oidc"
 	"github.com/dsseng/wiso/pkg/users"
@@ -29,6 +30,17 @@ var (
 	//go:embed templates
 	embedFS embed.FS
 )
+
+var gitRevision = func() string {
+	if info, ok := debug.ReadBuildInfo(); ok {
+		for _, setting := range info.Settings {
+			if setting.Key == "vcs.revision" {
+				return setting.Value[:8]
+			}
+		}
+	}
+	return ""
+}()
 
 func (a App) setupRouter() (*gin.Engine, error) {
 	r := gin.Default()
@@ -62,6 +74,7 @@ func (a App) setupRouter() (*gin.Engine, error) {
 			"image":        a.LogoLogin,
 			"mac":          c.Query("mac"),
 			"redirectURL":  c.Query("link-orig"),
+			"commit":       gitRevision,
 		})
 	})
 
