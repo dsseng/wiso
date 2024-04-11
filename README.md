@@ -1,5 +1,7 @@
 # Minimalist captive portal with advanced features
 
+Wiso project aims to build a network user management system including a captive portal and admin tools for network authorization. Goals of the project include maintainability, robustness, minimal and clear design and support for modern authentication technologies like SSO with OpenID Connect. The design goal is to allow customizing authentication methods and adding new ones.
+
 ## Build
 
 ```bash
@@ -23,7 +25,7 @@ docker run --net=wiso-net --name wiso-radius -e POSTGRES_PASSWORD=internal_pass 
 docker run --net=wiso-net --name wiso -v .:/conf:ro -p 8989:8989 -d ghcr.io/dsseng/wiso:latest
 ```
 
-Running locally:
+Running server natively (with PostgreSQL and FreeRADIUS running in Docker):
 ```bash
 ./wiso web -c config.yaml
 ```
