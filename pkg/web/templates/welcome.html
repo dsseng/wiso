@@ -56,6 +56,7 @@
           document.querySelector("#redirection").value = progress;
         } else if (redir) {
           window.location.replace(redir);
+          redir = null;
         }
       }, 50)
     </script>
