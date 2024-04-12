@@ -10,6 +10,7 @@ import (
 	"github.com/dsseng/wiso/pkg/ldap"
 	"github.com/dsseng/wiso/pkg/oidc"
 	"github.com/dsseng/wiso/pkg/users"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -45,6 +46,8 @@ var gitRevision = func() string {
 
 func (a App) setupRouter() (*gin.Engine, error) {
 	r := gin.Default()
+	r.Use(gzip.Gzip(gzip.DefaultCompression))
+
 	r.SetTrustedProxies([]string{})
 	templ := template.Must(
 		template.
