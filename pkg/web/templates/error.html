@@ -29,7 +29,7 @@
             {{ end }}
             {{ if .support }}
               <div class="field btn-field columns is-mobile is-centered">
-                <div class="is-column">Please contact <a href="{{ .support }}">Support</a></div>
+                <div class="is-column">Please ensure your credentials are valid and contact <a href="{{ .support }}">Support</a></div>
               </div>
             {{ end }}
             <div class="field caption columns is-mobile is-centered">
@@ -41,18 +41,5 @@
         </div>
       </div>
     </div>
-    <script>
-      let progress = 0;
-      let params = new URL(document.location.toString()).searchParams;
-      let redir = params.get("link-orig");
-      setInterval(function () {
-        if (progress < 100) {
-          progress += 100 * 50 / 15000; // 15s timeout
-          document.querySelector("#redirection").value = progress;
-        } else if (redir) {
-          window.location.replace(redir);
-        }
-      }, 50)
-    </script>
   </body>
 </html>
