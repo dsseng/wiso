@@ -50,6 +50,10 @@ func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string, linkOrig stri
 		if res.Error != nil {
 			return common.ErrorRedirect(p.BaseURL, res.Error)
 		}
+	} else if user[0].FullName != info.Name || user[0].Picture != info.Picture {
+		user[0].FullName = info.Name
+		user[0].Picture = info.Picture
+		p.DB.Save(user[0])
 	}
 
 	if mac != "" {
@@ -59,7 +63,6 @@ func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string, linkOrig stri
 		}
 	}
 
-	fmt.Println(linkOrig)
 	return common.WelcomeRedirect(p.BaseURL, user[0], linkOrig)
 }
 
