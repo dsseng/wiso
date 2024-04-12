@@ -32,6 +32,11 @@
                 <div class="is-column">Please contact <a href="{{ .support }}">Support</a></div>
               </div>
             {{ end }}
+            <div class="field my-1 columns is-mobile is-centered">
+              <div class="is-column is-small">
+                <a href="/login?mac={{ .mac }}&link-orig={{ .redirectURL }}">Retry</a>
+              </div>
+            </div>
           </form>
         </div>
       </div>

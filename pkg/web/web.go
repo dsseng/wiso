@@ -89,13 +89,15 @@ func (a App) setupRouter() (*gin.Engine, error) {
 		})
 	})
 
-	// Args: error to be displayed
+	// Args: error to be displayed, mac and link-orig for retru
 	r.GET("/error", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "error.html", gin.H{
-			"title":   "Error",
-			"error":   c.Query("error"),
-			"logo":    a.LogoError,
-			"support": a.SupportURL,
+			"title":       "Error",
+			"error":       c.Query("error"),
+			"logo":        a.LogoError,
+			"mac":         c.Query("mac"),
+			"redirectURL": c.Query("link-orig"),
+			"support":     a.SupportURL,
 		})
 	})
 

@@ -42,7 +42,13 @@
               </div>
             {{ end }}
             <div class="field my-1 columns is-mobile is-centered">
-              <div class="is-column is-small"><a href="https://github.com/dsseng/wiso/tree/{{ .commit }}">Wiso {{ .commit }}</a></div>
+                <div class="is-column is-size-7">
+                  {{ if .commit }}
+                    Wiso {{ .commit }} <a href="https://github.com/dsseng/wiso/tree/{{ .commit }}">GitHub</a>
+                  {{ else }}
+                    Wiso <a class="is-size-7" href="https://github.com/dsseng/wiso">GitHub</a>
+                  {{ end }}
+                </div>
             </div>
           </form>
         </div>
