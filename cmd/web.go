@@ -21,15 +21,15 @@ var webCmd = &cobra.Command{
 	Short: "Start a web interface to perform user auth and admin access",
 	Run: func(cmd *cobra.Command, args []string) {
 		app := web.App{
-			Database:     "",
-			DB:           db,
-			Base:         "http://localhost:8989/",
-			OIDC:         nil,
-			PasswordAuth: true,
-			LogoLogin:    "/static/logo.png",
-			LogoWelcome:  "/static/logo-welcome.png",
-			LogoError:    "/static/logo-error.png",
-			SupportURL:   "https://github.com/dsseng",
+			Database:    "",
+			DB:          db,
+			Base:        "http://localhost:8989/",
+			OIDC:        nil,
+			LDAP:        nil,
+			LogoLogin:   "/static/logo.png",
+			LogoWelcome: "/static/logo-welcome.png",
+			LogoError:   "/static/logo-error.png",
+			SupportURL:  "https://github.com/dsseng",
 		}
 		data, err := os.ReadFile(configPath)
 		if err != nil {

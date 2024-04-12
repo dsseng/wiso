@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"runtime/debug"
 
+	"github.com/dsseng/wiso/pkg/ldap"
 	"github.com/dsseng/wiso/pkg/oidc"
 	"github.com/dsseng/wiso/pkg/users"
 	"github.com/gin-gonic/gin"
@@ -14,16 +15,16 @@ import (
 )
 
 type App struct {
-	Base         string // Used by CLI
-	BaseURL      *url.URL
-	Database     string // Used by CLI
-	DB           *gorm.DB
-	OIDC         *oidc.OIDCProvider
-	PasswordAuth bool   `yaml:"password_auth"`
-	LogoLogin    string `yaml:"logo_login"`
-	LogoWelcome  string `yaml:"logo_welcome"`
-	LogoError    string `yaml:"logo_error"`
-	SupportURL   string `yaml:"support_url"`
+	Base        string // Used by CLI
+	BaseURL     *url.URL
+	Database    string // Used by CLI
+	DB          *gorm.DB
+	OIDC        *oidc.OIDCProvider
+	LDAP        *ldap.LDAPProvider
+	LogoLogin   string `yaml:"logo_login"`
+	LogoWelcome string `yaml:"logo_welcome"`
+	LogoError   string `yaml:"logo_error"`
+	SupportURL  string `yaml:"support_url"`
 }
 
 var (
@@ -70,7 +71,7 @@ func (a App) setupRouter() (*gin.Engine, error) {
 			"title":        "Network login",
 			"oidcID":       oidcID,
 			"oidcName":     oidcName,
-			"passwordAuth": a.PasswordAuth,
+			"passwordAuth": a.LDAP != nil,
 			"image":        a.LogoLogin,
 			"mac":          c.Query("mac"),
 			"redirectURL":  c.Query("link-orig"),
@@ -111,6 +112,16 @@ func (a App) setupRouter() (*gin.Engine, error) {
 		}
 	}
 
+	if a.LDAP != nil {
+		a.LDAP.BaseURL = a.BaseURL
+		a.LDAP.DB = a.DB
+
+		err := a.LDAP.Setup(r)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return r, nil
 }
 
@@ -123,7 +134,12 @@ func (a App) Start() error {
 		return err
 	}
 
+	// TODO: ensure this is handled well
+	defer (func() {
+		if a.LDAP != nil {
+			a.LDAP.Close()
+		}
+	})()
 	r.Run(":" + a.BaseURL.Port())
-
 	return nil
 }

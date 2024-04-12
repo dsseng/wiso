@@ -34,7 +34,7 @@ func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string, linkOrig stri
 
 	user, err := users.FindSingle(p.DB, username)
 	if err != nil {
-		return common.ErrorRedirect(p.BaseURL, err)
+		return common.ErrorRedirect(p.BaseURL, err, mac, linkOrig)
 	}
 
 	if len(user) == 0 {
@@ -48,7 +48,7 @@ func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string, linkOrig stri
 
 		res := p.DB.Create(user)
 		if res.Error != nil {
-			return common.ErrorRedirect(p.BaseURL, res.Error)
+			return common.ErrorRedirect(p.BaseURL, res.Error, mac, linkOrig)
 		}
 	} else if user[0].FullName != info.Name || user[0].Picture != info.Picture {
 		user[0].FullName = info.Name
@@ -59,7 +59,7 @@ func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string, linkOrig stri
 	if mac != "" {
 		err := users.StartSession(p.DB, user[0], mac, time.Now().Add(time.Hour*168))
 		if err != nil {
-			return common.ErrorRedirect(p.BaseURL, err)
+			return common.ErrorRedirect(p.BaseURL, err, mac, linkOrig)
 		}
 	}
 
@@ -90,7 +90,12 @@ func (p OIDCProvider) Setup(r *gin.Engine) error {
 	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, rp rp.RelyingParty, info *oidc.UserInfo) {
 		pos := strings.Index(state, "^")
 		if pos == -1 {
-			redir := common.ErrorRedirect(p.BaseURL, fmt.Errorf("Unknown auth state"))
+			redir := common.ErrorRedirect(
+				p.BaseURL,
+				fmt.Errorf("Unknown auth state"),
+				"",
+				"",
+			)
 			w.Header().Add("Location", redir)
 			w.WriteHeader(http.StatusSeeOther)
 			return
