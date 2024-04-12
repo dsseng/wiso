@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dsseng/wiso/pkg/common"
 	"github.com/dsseng/wiso/pkg/users"
 	"github.com/gin-gonic/gin"
 	"github.com/zitadel/oidc/v3/pkg/client/rp"
@@ -28,33 +29,12 @@ type OIDCProvider struct {
 	rp rp.RelyingParty
 }
 
-func (p OIDCProvider) errorRedirect(err error) string {
-	redir := p.BaseURL
-	query := redir.Query()
-	query.Add("error", err.Error())
-	redir.RawQuery = query.Encode()
-	redir.Path = "/error"
-	return redir.String()
-}
-
-func (p OIDCProvider) welcomeRedirect(user users.User, linkOrig string) string {
-	redir := p.BaseURL
-	redir.Path = "/welcome"
-	query := redir.Query()
-	query.Add("username", user.Username)
-	query.Add("full_name", user.FullName)
-	query.Add("link-orig", linkOrig)
-	query.Add("picture", user.Picture)
-	redir.RawQuery = query.Encode()
-	return redir.String()
-}
-
 func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string, linkOrig string) string {
 	username := info.PreferredUsername + "@" + p.ID
 
 	user, err := users.FindSingle(p.DB, username)
 	if err != nil {
-		return p.errorRedirect(err)
+		return common.ErrorRedirect(p.BaseURL, err)
 	}
 
 	if len(user) == 0 {
@@ -68,19 +48,19 @@ func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string, linkOrig stri
 
 		res := p.DB.Create(user)
 		if res.Error != nil {
-			return p.errorRedirect(res.Error)
+			return common.ErrorRedirect(p.BaseURL, res.Error)
 		}
 	}
 
 	if mac != "" {
 		err := users.StartSession(p.DB, user[0], mac, time.Now().Add(time.Hour*168))
 		if err != nil {
-			return p.errorRedirect(err)
+			return common.ErrorRedirect(p.BaseURL, err)
 		}
 	}
 
 	fmt.Println(linkOrig)
-	return p.welcomeRedirect(user[0], linkOrig)
+	return common.WelcomeRedirect(p.BaseURL, user[0], linkOrig)
 }
 
 func (p OIDCProvider) Setup(r *gin.Engine) error {
@@ -107,13 +87,8 @@ func (p OIDCProvider) Setup(r *gin.Engine) error {
 	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, rp rp.RelyingParty, info *oidc.UserInfo) {
 		pos := strings.Index(state, "^")
 		if pos == -1 {
-			fmt.Println("Unknown auth state")
-			redir := p.BaseURL
-			redir.Path = "/error"
-			query := redir.Query()
-			query.Add("error", "Unknown auth state")
-			redir.RawQuery = query.Encode()
-			w.Header().Add("Location", redir.String())
+			redir := common.ErrorRedirect(p.BaseURL, fmt.Errorf("Unknown auth state"))
+			w.Header().Add("Location", redir)
 			w.WriteHeader(http.StatusSeeOther)
 			return
 		}
