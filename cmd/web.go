@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"time"
 
+	"github.com/dsseng/wiso/pkg/users"
 	"github.com/dsseng/wiso/pkg/web"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -21,15 +23,16 @@ var webCmd = &cobra.Command{
 	Short: "Start a web interface to perform user auth and admin access",
 	Run: func(cmd *cobra.Command, args []string) {
 		app := web.App{
-			Database:    "",
-			DB:          db,
-			Base:        "http://localhost:8989/",
-			OIDC:        nil,
-			LDAP:        nil,
-			LogoLogin:   "/static/logo.png",
-			LogoWelcome: "/static/logo-welcome.png",
-			LogoError:   "/static/logo-error.png",
-			SupportURL:  "https://github.com/dsseng",
+			Database:        "",
+			DB:              db,
+			Base:            "http://localhost:8989/",
+			OIDC:            nil,
+			LDAP:            nil,
+			LogoLogin:       "/static/logo.png",
+			LogoWelcome:     "/static/logo-welcome.png",
+			LogoError:       "/static/logo-error.png",
+			SupportURL:      "https://github.com/dsseng",
+			CleanupInterval: time.Hour,
 		}
 		data, err := os.ReadFile(configPath)
 		if err != nil {
@@ -55,6 +58,13 @@ var webCmd = &cobra.Command{
 				fmt.Println("Failed to connect database", err)
 			}
 		}
+
+		go (func() {
+			users.CleanupOutdatedSessions(app.DB)
+			for range time.Tick(app.CleanupInterval) {
+				users.CleanupOutdatedSessions(app.DB)
+			}
+		})()
 
 		fmt.Printf("Starting web server as %v\n", app.BaseURL.String())
 		err = app.Start()

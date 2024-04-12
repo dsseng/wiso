@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"runtime/debug"
+	"time"
 
 	"github.com/dsseng/wiso/pkg/ldap"
 	"github.com/dsseng/wiso/pkg/oidc"
@@ -16,16 +17,17 @@ import (
 )
 
 type App struct {
-	Base        string // Used by CLI
-	BaseURL     *url.URL
-	Database    string // Used by CLI
-	DB          *gorm.DB
-	OIDC        *oidc.OIDCProvider
-	LDAP        *ldap.LDAPProvider
-	LogoLogin   string `yaml:"logo_login"`
-	LogoWelcome string `yaml:"logo_welcome"`
-	LogoError   string `yaml:"logo_error"`
-	SupportURL  string `yaml:"support_url"`
+	Base            string `yaml:"base"` // Used by CLI
+	BaseURL         *url.URL
+	Database        string `yaml:"database"` // Used by CLI
+	DB              *gorm.DB
+	OIDC            *oidc.OIDCProvider
+	LDAP            *ldap.LDAPProvider
+	LogoLogin       string        `yaml:"logo_login"`
+	LogoWelcome     string        `yaml:"logo_welcome"`
+	LogoError       string        `yaml:"logo_error"`
+	SupportURL      string        `yaml:"support_url"`
+	CleanupInterval time.Duration `yaml:"cleanup_interval"` // Used by CLI
 }
 
 var (
