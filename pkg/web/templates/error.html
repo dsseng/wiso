@@ -7,9 +7,9 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>{{ .title }}</title>
       <link rel="stylesheet" href="/static/style.css">
-      <link rel="stylesheet" href="/static/bulma.min.css">
+      <link rel="stylesheet" href="/static/bulma-no-dark-mode.min.css">
   </head>
-  <body class="has-background-info">
+  <body class="body-bg">
     <div class="hero is-tablet is-fullheight">
       <div class="hero-body columns is-centered">
         <div class="column is-12-mobile is-8-tablet is-4-widescreen">
@@ -19,20 +19,20 @@
                 <img style="max-width: 100px;" class="is-column" src="{{ .logo }}" />
               </div>
             {{ end }}
-            <div class="field my-1 columns is-mobile is-centered">
+            <div class="field btn-field columns is-mobile is-centered">
               <div class="is-column">An error occured</div>
             </div>
             {{ if .error }}
-              <div class="field my-1 columns is-mobile is-centered">
+              <div class="field btn-field columns is-mobile is-centered">
                 <div class="is-column">{{ .error }}</div>
               </div>
             {{ end }}
             {{ if .support }}
-              <div class="field my-1 columns is-mobile is-centered">
+              <div class="field btn-field columns is-mobile is-centered">
                 <div class="is-column">Please contact <a href="{{ .support }}">Support</a></div>
               </div>
             {{ end }}
-            <div class="field my-1 columns is-mobile is-centered">
+            <div class="field caption columns is-mobile is-centered">
               <div class="is-column is-small">
                 <a href="/login?mac={{ .mac }}&link-orig={{ .redirectURL }}">Retry</a>
               </div>

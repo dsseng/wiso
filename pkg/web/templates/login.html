@@ -7,9 +7,9 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>{{ .title }}</title>
       <link rel="stylesheet" href="/static/style.css">
-      <link rel="stylesheet" href="/static/bulma.min.css">
+      <link rel="stylesheet" href="/static/bulma-no-dark-mode.min.css">
   </head>
-  <body class="has-background-info">
+  <body class="body-bg">
     <div class="hero is-tablet is-fullheight">
       <div class="hero-body columns is-centered">
         <div class="column is-12-mobile is-8-tablet is-4-widescreen">
@@ -18,30 +18,30 @@
             <input type="hidden" name="mac" value="{{ .mac }}">
             {{ if .image }}
               <div class="field columns is-mobile is-centered">
-                <img style="max-width: 100px;" class="is-column" src="{{ .image }}" />
+                <img style="max-width: 200px;" class="is-column" src="{{ .image }}" />
               </div>
             {{ end }}
             {{ if .passwordAuth }}
               <div class="field">
                 <label for="" class="label">Username</label>
-                <input name="uid" type="username" placeholder="doe.jj" class="input is-success" required>
+                <input name="uid" type="username" placeholder="doe.jj" class="input is-primary" required>
               </div>
               <div class="field mb-3">
                 <label for="" class="label">Password</label>
-                <input name="pass" type="password" placeholder="··········" class="input is-success" required>
+                <input name="pass" type="password" placeholder="··········" class="input is-primary" required>
               </div>
-              <div class="field my-2 columns is-mobile is-centered">
+              <div class="field btn-field columns is-mobile is-centered">
                 <input type="submit" value="Login" class="button is-small column is-8-mobile is-6-tablet is-6-widescreen is-4-fullhd is-primary has-text-light" />
               </div>
             {{ end }}
             {{ if .oidcName }}
-              <div class="field my-2 columns is-mobile is-centered">
+              <div class="field btn-field columns is-mobile is-centered">
                 <a href="/{{ .oidcID }}/login?mac={{ .mac }}&link-orig={{ .redirectURL }}" class="button is-small is-outlined column is-8-mobile is-6-tablet is-6-widescreen is-4-fullhd is-primary">
                   Continue with {{ .oidcName }}
                 </a>
               </div>
             {{ end }}
-            <div class="field my-1 columns is-mobile is-centered">
+            <div class="field caption columns is-mobile is-centered">
                 <div class="is-column is-size-7">
                   {{ if .commit }}
                     Wiso {{ .commit }} <a href="https://github.com/dsseng/wiso/tree/{{ .commit }}">GitHub</a>
