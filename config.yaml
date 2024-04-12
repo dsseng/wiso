@@ -14,7 +14,8 @@ database: host=wiso-postgres user=postgres password=internal_pass dbname=radius 
 #  issuer:        https://gitea.example.com/
 #  id:            gitea
 #  name:          Gitea
-logo_login:    /static/logo.png
-logo_welcome:  /static/logo-welcome.png
-logo_error:    /static/logo-error.png
-support_url:   https://github.com/dsseng
+logo_login:       /static/logo.png
+logo_welcome:     /static/logo-welcome.png
+logo_error:       /static/logo-error.png
+support_url:      https://github.com/dsseng
+cleanup_interval: 1h
