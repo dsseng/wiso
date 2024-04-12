@@ -1,12 +1,19 @@
 base: http://192.168.88.235:8989/
 database: host=wiso-postgres user=postgres password=internal_pass dbname=radius port=5432 sslmode=disable
+#ldap:
+#  url:           ldap://172.17.0.8:1389/
+#  bind_dn:       uid=user-ro,ou=Users,dc=example,dc=com
+#  bind_pass:     user-ro
+#  base_dn:       dc=example,dc=com
+## user_filter:   (&(objectClass=organizationalPerson)(uid=%s))
+#  user_filter:   (&(objectClass=inetOrgPerson)(uid=%s))
+#  name_attr:     cn
 #oidc:
 #  client_id:     UUID
 #  client_secret: gto_
 #  issuer:        https://gitea.example.com/
 #  id:            gitea
 #  name:          Gitea
-password_auth: true
 logo_login:    /static/logo.png
 logo_welcome:  /static/logo-welcome.png
 logo_error:    /static/logo-error.png
