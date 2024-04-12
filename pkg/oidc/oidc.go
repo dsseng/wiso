@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dsseng/wiso/pkg/radius"
 	"github.com/dsseng/wiso/pkg/users"
 	"github.com/gin-gonic/gin"
 	"github.com/zitadel/oidc/v3/pkg/client/rp"
@@ -29,23 +28,36 @@ type OIDCProvider struct {
 	rp rp.RelyingParty
 }
 
+func (p OIDCProvider) errorRedirect(err error) string {
+	redir := p.BaseURL
+	query := redir.Query()
+	query.Add("error", err.Error())
+	redir.RawQuery = query.Encode()
+	redir.Path = "/error"
+	return redir.String()
+}
+
+func (p OIDCProvider) welcomeRedirect(user users.User, linkOrig string) string {
+	redir := p.BaseURL
+	redir.Path = "/welcome"
+	query := redir.Query()
+	query.Add("username", user.Username)
+	query.Add("full_name", user.FullName)
+	query.Add("link-orig", linkOrig)
+	query.Add("picture", user.Picture)
+	redir.RawQuery = query.Encode()
+	return redir.String()
+}
+
 func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string, linkOrig string) string {
-	// TODO: Factor out find or create
 	username := info.PreferredUsername + "@" + p.ID
-	user := []users.User{{}}
-	res := p.DB.Limit(1).Find(&user, "username = ?", username)
-	if res.Error != nil {
-		fmt.Println("A DB error occured", res.Error)
-		redir := p.BaseURL
-		query := redir.Query()
-		query.Add("error", res.Error.Error())
-		redir.RawQuery = query.Encode()
-		redir.Path = "/error"
-		return redir.String()
+
+	user, err := users.FindSingle(p.DB, username)
+	if err != nil {
+		return p.errorRedirect(err)
 	}
 
-	if res.RowsAffected == 0 {
-		// TODO: Groups?
+	if len(user) == 0 {
 		user = []users.User{
 			{
 				Username: username,
@@ -53,50 +65,22 @@ func (p OIDCProvider) processUser(info *oidc.UserInfo, mac string, linkOrig stri
 				Picture:  info.Picture,
 			},
 		}
+
+		res := p.DB.Create(user)
+		if res.Error != nil {
+			return p.errorRedirect(res.Error)
+		}
 	}
 
 	if mac != "" {
-		// TODO: Factor out login
-		radcheck := radius.RadCheck{
-			Username:  mac,
-			Attribute: "Cleartext-Password",
-			Op:        ":=",
-			Value:     "macauth",
+		err := users.StartSession(p.DB, user[0], mac, time.Now().Add(time.Hour*168))
+		if err != nil {
+			return p.errorRedirect(err)
 		}
-		res = p.DB.Create(&radcheck)
-		if res.Error != nil {
-			fmt.Println("A DB error occured", res.Error)
-			redir := p.BaseURL
-			redir.Path = "/error"
-			query := redir.Query()
-			query.Add("error", res.Error.Error())
-			redir.RawQuery = query.Encode()
-			return redir.String()
-		}
-
-		user[0].DeviceSessions = append(user[0].DeviceSessions, users.DeviceSession{
-			DueDate:    time.Now().Add(time.Hour * 168),
-			RadcheckID: radcheck.ID,
-			MAC:        mac,
-		})
-	}
-	res = p.DB.Save(user)
-	if res.Error != nil {
-		fmt.Println("A DB error occured", res.Error)
-		redir := p.BaseURL
-		redir.Path = "/error"
-		return redir.String()
 	}
 
-	redir := p.BaseURL
-	redir.Path = "/welcome"
-	query := redir.Query()
-	query.Add("username", info.PreferredUsername)
-	query.Add("full_name", info.Name)
-	query.Add("link-orig", linkOrig)
-	query.Add("picture", info.Picture)
-	redir.RawQuery = query.Encode()
-	return redir.String()
+	fmt.Println(linkOrig)
+	return p.welcomeRedirect(user[0], linkOrig)
 }
 
 func (p OIDCProvider) Setup(r *gin.Engine) error {
