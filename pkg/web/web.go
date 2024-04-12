@@ -87,6 +87,7 @@ func (a App) setupRouter() (*gin.Engine, error) {
 			"full_name": c.Query("full_name"),
 			"username":  c.Query("username"),
 			"logo":      a.LogoWelcome,
+			"commit":    gitRevision,
 		})
 	})
 
