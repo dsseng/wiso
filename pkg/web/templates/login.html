@@ -15,8 +15,8 @@
         <div class="column is-12-mobile is-8-tablet is-4-widescreen">
           <form action="" class="box">
             {{ if .image }}
-              <div class="field ma-6">
-                <img class="ma-6" src="{{ .image }}" />
+              <div class="field columns is-mobile is-centered">
+                <img style="max-width: 100px;" class="is-column" src="{{ .image }}" />
               </div>
             {{ end }}
             {{ if .passwordAuth }}
