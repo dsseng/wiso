@@ -132,8 +132,8 @@ func (a App) setupRouter() (*gin.Engine, error) {
 }
 
 func (a App) Start() error {
-	a.DB.AutoMigrate(&users.User{})
 	a.DB.AutoMigrate(&users.DeviceSession{})
+	a.DB.AutoMigrate(&users.User{})
 
 	r, err := a.setupRouter()
 	if err != nil {
