@@ -1,7 +1,5 @@
-FROM fedora:39
+FROM freeradius/freeradius-server:latest-3.2-alpine
 
-RUN dnf update -y && dnf install -y freeradius freeradius-postgresql freeradius-utils && rm -rf /var/cache/dnf
-RUN rm -rf /etc/raddb
+RUN apk add --no-cache libpq freeradius-utils
+
 COPY ./raddb /etc/raddb/
-
-ENTRYPOINT ["/usr/sbin/radiusd", "-fxl", "stdout"]

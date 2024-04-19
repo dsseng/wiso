@@ -84,8 +84,8 @@
 # The canonical testing user which is in most of the
 # examples.
 #
-bob	Cleartext-Password := "hello"
-	Reply-Message := "Hello, %{User-Name}"
+#bob	Cleartext-Password := "hello"
+#	Reply-Message := "Hello, %{User-Name}"
 #
 
 #
