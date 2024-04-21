@@ -59,6 +59,9 @@ var webCmd = &cobra.Command{
 			}
 		}
 
+		app.DB.AutoMigrate(&users.DeviceSession{})
+		app.DB.AutoMigrate(&users.User{})
+
 		go (func() {
 			users.CleanupOutdatedSessions(app.DB)
 			for range time.Tick(app.CleanupInterval) {

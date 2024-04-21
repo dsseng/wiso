@@ -9,4 +9,5 @@ FROM scratch
 WORKDIR /
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /wiso /wiso
+ENV GIN_MODE=release
 ENTRYPOINT ["/wiso", "web", "-c", "/conf/config.yaml"]
