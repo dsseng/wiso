@@ -82,7 +82,7 @@ func StartSession(db *gorm.DB, user User, mac string, dueDate time.Time) error {
 
 type User struct {
 	gorm.Model
-	Username       string `gorm:"unique"`
+	Username       string
 	Picture        string
 	FullName       string
 	DeviceSessions []DeviceSession
